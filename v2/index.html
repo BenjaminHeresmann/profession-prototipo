@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>PROFESSION v2</title>
+<script>if(new URLSearchParams(location.search).has('reset')){try{localStorage.clear();sessionStorage.clear();}catch(e){}location.replace(location.pathname);}</script>
+<style>
+:root{
+  --navy:#1F3A5F; --navy-d:#16294a; --gold:#C9A14A; --gold-l:#F4E8CE;
+  --green:#2E7D46; --green-l:#E7F3EB; --bg:#F7F8FA; --card:#FFFFFF;
+  --text:#1c2733; --muted:#6b7686; --line:#E5E8EE; --red:#C0392B; --red-l:#FBEAE8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--navy-d);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text)}
+#app{max-width:430px;margin:0 auto;min-height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative}
+@media(min-width:500px){#app{margin:16px auto;min-height:calc(100dvh - 32px);border-radius:24px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.4)}}
+.screen{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding-bottom:76px}
+.header{background:var(--navy);color:#fff;padding:18px 16px 14px;position:sticky;top:0;z-index:5}
+.header h1{font-size:22px;font-weight:800}
+.header .sub{font-size:13px;opacity:.85;margin-top:2px}
+.hrow{display:flex;align-items:center;gap:10px}
+.back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex:none}
+.content{padding:16px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card.gold{border-color:var(--gold)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;width:100%;font-family:inherit}
+.btn.primary{background:var(--navy);color:#fff}
+.btn.gold{background:var(--gold);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.ghost{background:transparent;color:var(--navy);border:1.5px solid var(--line)}
+.btn.danger-ghost{background:transparent;color:var(--red);border:1.5px solid var(--red-l)}
+.btn:disabled{opacity:.45;cursor:default}
+.tabs{position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
+@media(min-width:500px){.tabs{bottom:16px;border-radius:0 0 24px 24px}}
+.tab{flex:1;padding:9px 4px 10px;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;font-weight:600}
+.tab .ico{font-size:20px;display:block;margin-bottom:2px}
+.tab.on{color:var(--navy)}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700}
+.chip.ok{background:var(--green-l);color:var(--green)} .chip.warn{background:var(--gold-l);color:#8a6d2a}
+.chip.info{background:#E8EDF5;color:var(--navy)} .chip.bad{background:var(--red-l);color:var(--red)}
+.badge-v{position:fixed;top:8px;right:8px;z-index:99;background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;cursor:pointer}
+.avatar{width:46px;height:46px;border-radius:50%;background:repeating-linear-gradient(45deg,#e8ebf0,#e8ebf0 6px,#f4f6f9 6px,#f4f6f9 12px);border:2px solid var(--gold);flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--navy)}
+.stars{color:var(--gold);letter-spacing:1px}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.cat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;cursor:pointer}
+.cat .ico{width:38px;height:38px;border-radius:10px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.cat span{font-size:12.5px;font-weight:600}
+input,textarea,select{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px;font-size:16px;font-family:inherit;background:#fff;color:var(--text)}
+input:focus,textarea:focus{outline:none;border-color:var(--navy)}
+label{font-size:13px;font-weight:700;margin-bottom:5px;display:block}
+.toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);background:rgba(20,25,35,.92);color:#fff;padding:9px 16px;border-radius:99px;font-size:13px;z-index:100;white-space:nowrap;transition:opacity .3s}
+.divider{height:1px;background:var(--line);margin:2px 0}
+.section-t{font-size:16px;font-weight:800;margin-top:4px}
+.money{color:var(--green);font-weight:800}
+.item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-child{border-bottom:none}
+.switch{width:44px;height:26px;border-radius:99px;background:#cfd6df;position:relative;cursor:pointer;flex:none;transition:background .2s}
+.switch.on{background:var(--green)}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+.switch.on::after{left:21px}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none}
+.bubble{max-width:80%;padding:10px 13px;border-radius:14px;font-size:15px;line-height:1.35}
+.bubble.me{background:var(--gold-l);align-self:flex-end;border-bottom-right-radius:4px}
+.bubble.them{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.btime{font-size:10.5px;color:var(--muted);margin-top:3px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="badge-v" onclick="go('changelog')">v2 · iter 1</div>
+<script>
+/* ============ PROFESSION v2 — SPA propia, extensible ============ */
+/* Estado global persistente */
+var S = {};
+try { S = JSON.parse(localStorage.getItem('pv2') || '{}'); } catch(e) {}
+function save() { try { localStorage.setItem('pv2', JSON.stringify(S)); } catch(e) {} }
+S.screen = S.screen || 'rol';
+S.notifRead = S.notifRead || false;
+S.prefs = S.prefs || { push: true, sms: true, mail: false };
+
+var $ = function(html) { return html; };
+function fmt(n) { return '$' + (n || 0).toLocaleString('es-CL'); }
+
+/* ---- Datos mock (extensibles en próximas iteraciones) ---- */
+var CATS = [
+  { k: 'gasfiteria', n: 'Gasfitería', c: '#3E6B8F' }, { k: 'electricidad', n: 'Electricidad', c: '#C9A14A' },
+  { k: 'limpieza', n: 'Limpieza', c: '#4C8F6B' }, { k: 'carpinteria', n: 'Carpintería', c: '#8F6B4C' },
+  { k: 'jardineria', n: 'Jardinería', c: '#5F8F3E' }, { k: 'pintura', n: 'Pintura', c: '#7A5F9E' }
+];
+var PROS = [
+  { id: 1, n: 'Roberto Díaz', cat: 'Carpintería', exp: '10+ años', jobs: 238, rating: 4.9, op: 112, km: 1.2, desde: 20000, hoy: true },
+  { id: 2, n: 'Luis Contreras', cat: 'Carpintería', exp: '6 años', jobs: 94, rating: 4.7, op: 61, km: 2.8, desde: 18000, hoy: false },
+  { id: 3, n: 'Patricia Muñoz', cat: 'Limpieza', exp: '8 años', jobs: 150, rating: 4.8, op: 87, km: 3.5, desde: 15000, hoy: true }
+];
+var MY_SERVICES = [
+  { id: 4218, t: 'Puerta de closet', pro: 'Roberto Díaz', estado: 'Confirmado', tipo: 'ok', fecha: 'Hoy, 15:00', monto: 37500 },
+  { id: 4102, t: 'Lavado de auto', pro: 'Patricia Muñoz', estado: 'Finalizado', tipo: 'info', fecha: '28/07', monto: 25000 }
+];
+var CHATS_A = [
+  { id: 1, n: 'Roberto Díaz', last: 'Voy en camino, llego 15:00 en punto.', t: '14:12', unread: 1 },
+  { id: 3, n: 'Patricia Muñoz', last: 'Gracias por la evaluación 🙌', t: 'Ayer', unread: 0 }
+];
+var NOTIFS = [
+  { tipo: 'ok', t: 'Precio confirmado', d: 'Confirmaste $37.500 por "Puerta de closet". Contrato cerrado.', when: 'Hoy 10:41' },
+  { tipo: 'info', t: 'Roberto está en camino', d: 'Llega aprox. 15:00 a Av. Irarrázaval 3421.', when: 'Hoy 14:12' },
+  { tipo: 'warn', t: 'Evalúa tu servicio', d: 'Tienes 48 hrs para evaluar "Lavado de auto".', when: '28/07' }
+];
+
+/* ---- Router ---- */
+function go(screen, param) {
+  S.screen = screen; S.param = param; save();
+  render();
+  var sc = document.querySelector('.screen'); if (sc) sc.scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+function toast(msg) {
+  var t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(function(){ t.style.opacity = 0; }, 1800);
+  setTimeout(function(){ t.remove(); }, 2200);
+}
+
+/* ---- Componentes ---- */
+function header(title, sub, backTo) {
+  return '<div class="header"><div class="hrow">' +
+    (backTo ? '<div class="back" onclick="go(\'' + backTo + '\')">‹</div>' : '') +
+    '<div class="grow"><h1>' + title + '</h1>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div></div></div>';
+}
+function tabsA(on) {
+  var t = [['a_home','🏠','Inicio'],['a_servicios','🧾','Mis servicios'],['a_chats','💬','Mensajes'],['a_cuenta','👤','Mi cuenta']];
+  return '<div class="tabs">' + t.map(function(x){
+    return '<div class="tab' + (on === x[0] ? ' on' : '') + '" onclick="go(\'' + x[0] + '\')"><span class="ico">' + x[1] + '</span>' + x[2] + '</div>';
+  }).join('') + '</div>';
+}
+function tabsB(on) {
+  var t = [['b_panel','📋','Panel'],['b_agenda','📅','Agenda'],['b_chats','💬','Mensajes'],['b_perfil','👤','Perfil']];
+  return '<div class="tabs">' + t.map(function(x){
+    return '<div class="tab' + (on === x[0] ? ' on' : '') + '" onclick="go(\'' + x[0] + '\')"><span class="ico">' + x[1] + '</span>' + x[2] + '</div>';
+  }).join('') + '</div>';
+}
+function proCard(p) {
+  return '<div class="card gold row" onclick="go(\'a_pro\',' + p.id + ')" style="cursor:pointer">' +
+    '<div class="avatar">' + p.n.split(' ').map(function(w){return w[0];}).join('') + '</div>' +
+    '<div class="grow"><b>' + p.n + ' <span style="color:var(--gold)">✔</span></b>' +
+    '<div class="muted">' + p.cat + ' · ' + p.exp + '</div>' +
+    '<div class="muted"><span class="stars">★</span> ' + p.rating + ' (' + p.op + ') · a ' + p.km + ' km · desde <b>' + fmt(p.desde) + '</b></div></div>' +
+    '<span class="chip ' + (p.hoy ? 'ok' : 'warn') + '">' + (p.hoy ? 'Hoy' : 'Mañana') + '</span></div>';
+}
+
+/* ---- Pantallas ---- */
+var SCREENS = {
+
+rol: function() {
+  return '<div class="screen" style="background:var(--navy);justify-content:center;padding:24px">' +
+  '<div style="text-align:center;color:#fff;margin-bottom:28px">' +
+  '<div style="width:84px;height:84px;border-radius:22px;background:#fff;color:var(--navy);font-size:48px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">P</div>' +
+  '<h1 style="letter-spacing:2px">PROFESSION</h1>' +
+  '<div style="width:44px;height:3px;background:var(--gold);margin:10px auto"></div>' +
+  '<div style="opacity:.85;font-size:14px">El profesionalismo no es un título,<br>es cómo se hace cada tarea.</div></div>' +
+  '<div style="display:flex;flex-direction:column;gap:12px">' +
+  '<div class="card gold" style="cursor:pointer" onclick="go(\'a_home\')"><div class="row"><span style="font-size:26px">🔍</span><div class="grow"><b>Quiero solicitar un servicio</b><div class="muted">Encuentra maestros verificados cerca tuyo</div></div><span style="color:var(--gold);font-size:20px">›</span></div></div>' +
+  '<div class="card gold" style="cursor:pointer" onclick="go(\'b_panel\')"><div class="row"><span style="font-size:26px">🛠</span><div class="grow"><b>Quiero trabajar con PROFESSION</b><div class="muted">Recibe trabajos cercanos y cobra seguro</div></div><span style="color:var(--gold);font-size:20px">›</span></div></div>' +
+  '<div style="text-align:center;color:#fff;opacity:.7;font-size:12.5px;margin-top:6px">Para trabajar necesitarás verificar tu identidad.</div></div></div>';
+},
+
+/* ===== FLUJO CLIENTE ===== */
+a_home: function() {
+  return '<div class="screen">' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'rol\')">‹</div><div class="grow">' +
+  '<div class="sub">Hola, Camila 👋</div><h1>¿Qué necesitas hoy?</h1></div>' +
+  '<div style="position:relative;cursor:pointer" onclick="go(\'a_notifs\')"><span style="font-size:22px">🔔</span>' +
+  (S.notifRead ? '' : '<span class="notif-dot" style="position:absolute;top:0;right:0"></span>') + '</div></div>' +
+  '<div style="margin-top:12px"><input placeholder="🔎 Buscar oficio, ej: gasfitería" onfocus="toast(\'Búsqueda: próxima iteración\')"></div></div>' +
+  '<div class="content">' +
+  '<div class="section-t">Oficios</div><div class="grid3">' +
+  CATS.map(function(c){ return '<div class="cat" onclick="go(\'a_lista\',\'' + c.n + '\')"><div class="ico" style="background:' + c.c + '22;color:' + c.c + '">' + c.n[0] + '</div><span>' + c.n + '</span></div>'; }).join('') + '</div>' +
+  '<div class="card" style="background:var(--navy);color:#fff"><div class="row"><div class="grow"><b>¿No sabes qué oficio necesitas?</b><div style="font-size:13px;opacity:.85">Publica tu solicitud y recibe propuestas.</div></div><button class="btn gold" style="width:auto;padding:10px 18px" onclick="go(\'a_publicar\')">Publicar</button></div></div>' +
+  '<div class="section-t">Cerca de ti</div>' + PROS.slice(0,2).map(proCard).join('') +
+  '</div>' + tabsA('a_home') + '</div>';
+},
+
+a_lista: function() {
+  var cat = S.param || 'Carpintería';
+  var list = PROS.filter(function(p){ return p.cat === cat; });
+  if (!list.length) list = PROS;
+  return '<div class="screen">' + header(cat, list.length + ' disponibles cerca de Ñuñoa', 'a_home') +
+  '<div class="content">' +
+  '<div class="row" style="gap:8px"><span class="chip info">Más cercanos ▾</span><span class="chip warn">★ 4,5+</span><span class="chip ok">Hoy</span></div>' +
+  list.map(proCard).join('') +
+  '<div class="card" style="background:var(--navy);color:#fff"><div class="row"><div class="grow"><b>¿Prefieres recibir propuestas?</b><div style="font-size:13px;opacity:.85">Publica tu solicitud y los maestros postulan.</div></div><button class="btn gold" style="width:auto;padding:10px 18px" onclick="go(\'a_publicar\')">Publicar</button></div></div>' +
+  '</div>' + tabsA('a_home') + '</div>';
+},
+
+a_pro: function() {
+  var p = PROS.filter(function(x){ return x.id === S.param; })[0] || PROS[0];
+  return '<div class="screen">' + header(p.n + ' ✔', p.cat + ' · Ñuñoa, Santiago', 'a_home') +
+  '<div class="content">' +
+  '<div class="card gold"><div class="row"><div class="avatar" style="width:64px;height:64px;font-size:20px">' + p.n.split(' ').map(function(w){return w[0];}).join('') + '</div>' +
+  '<div class="grow"><span class="chip ok">✔ Verificado</span><div class="stars" style="margin-top:4px">★★★★★ <b style="color:var(--text)">' + p.rating + '</b> <span class="muted">(' + p.op + ' opiniones)</span></div></div></div>' +
+  '<div class="grid3" style="margin-top:12px;text-align:center">' +
+  '<div><b>' + p.exp + '</b><div class="muted">experiencia</div></div>' +
+  '<div><b>' + p.jobs + '</b><div class="muted">trabajos</div></div>' +
+  '<div><b>98%</b><div class="muted">a tiempo</div></div></div></div>' +
+  '<div class="section-t">Galería de trabajos</div>' +
+  '<div class="grid2">' + [1,2,3,4].map(function(){ return '<div style="height:90px;border-radius:12px;background:repeating-linear-gradient(45deg,#e8ebf0,#e8ebf0 8px,#f4f6f9 8px,#f4f6f9 16px);border:1px solid var(--line);display:flex;align-items:center;justify-content:center" class="muted">foto</div>'; }).join('') + '</div>' +
+  '<div class="section-t">Opiniones</div>' +
+  '<div class="card"><div class="stars">★★★★★</div><div style="font-size:14px;margin:4px 0">"Impecable, puntual y muy ordenado. Volvería a contratarlo."</div><div class="muted">Marcela V. · Providencia · 04/08/26</div></div>' +
+  '<div class="card"><div class="stars">★★★★☆</div><div style="font-size:14px;margin:4px 0">"Buen trabajo, llegó con algo de atraso pero avisó."</div><div class="muted">Jorge P. · Macul · 30/03/26</div></div>' +
+  '<button class="btn primary" onclick="toast(\'Chat de contratación: próxima iteración\')">Contactar y pedir precio</button>' +
+  '<button class="btn ghost" onclick="toast(\'Agenda: próxima iteración\')">Programar servicio</button>' +
+  '</div>' + tabsA('a_home') + '</div>';
+},
+
+a_publicar: function() {
+  return '<div class="screen">' + header('Publicar solicitud', null, 'a_home') +
+  '<div class="content">' +
+  '<div><label>Oficio</label><select>' + CATS.map(function(c){ return '<option>' + c.n + '</option>'; }).join('') + '</select></div>' +
+  '<div><label>¿Qué necesitas?</label><textarea rows="3" placeholder="Describe el problema con detalle..."></textarea></div>' +
+  '<div><label>Ubicación</label><input value="Av. Irarrázaval 3421, Ñuñoa"></div>' +
+  '<div><label>¿Para cuándo?</label><div class="row" style="gap:8px"><span class="chip bad">Urgente, hoy</span><span class="chip warn">Esta semana</span><span class="chip info">Flexible</span></div></div>' +
+  '<div><label>Presupuesto referencial (opcional)</label><input inputmode="numeric" placeholder="$ 30.000"></div>' +
+  '<button class="btn primary" onclick="toast(\'Flujo completo de solicitud: próxima iteración\');go(\'a_servicios\')">Publicar solicitud</button>' +
+  '</div>' + tabsA('a_home') + '</div>';
+},
+
+a_servicios: function() {
+  return '<div class="screen">' + header('Mis servicios', null, null) +
+  '<div class="content">' +
+  MY_SERVICES.map(function(s){
+    return '<div class="card" onclick="toast(\'Detalle del servicio: próxima iteración\')" style="cursor:pointer">' +
+    '<div class="row"><div class="grow"><b>' + s.t + '</b><div class="muted">' + s.pro + ' · ' + s.fecha + '</div></div>' +
+    '<span class="chip ' + s.tipo + '">' + s.estado + '</span></div>' +
+    '<div class="divider" style="margin:10px 0"></div>' +
+    '<div class="row"><span class="muted grow">Precio acordado</span><span class="money">' + fmt(s.monto) + '</span></div></div>';
+  }).join('') +
+  '<div class="card" style="text-align:center;padding:22px"><div style="font-size:26px">🧾</div><b>¿Necesitas algo más?</b><div class="muted" style="margin:6px 0 12px">Publica una nueva solicitud y recibe propuestas.</div><button class="btn primary" onclick="go(\'a_publicar\')">Nueva solicitud</button></div>' +
+  '</div>' + tabsA('a_servicios') + '</div>';
+},
+
+a_chats: function() {
+  return '<div class="screen">' + header('Mensajes', null, null) +
+  '<div class="content"><div class="card" style="padding:4px 14px">' +
+  CHATS_A.map(function(c){
+    return '<div class="item" onclick="go(\'a_chat\',' + c.id + ')">' +
+    '<div class="avatar">' + c.n.split(' ').map(function(w){return w[0];}).join('') + '</div>' +
+    '<div class="grow"><b>' + c.n + '</b><div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px">' + c.last + '</div></div>' +
+    '<div style="text-align:right"><div class="muted">' + c.t + '</div>' + (c.unread ? '<span class="chip warn">' + c.unread + '</span>' : '') + '</div></div>';
+  }).join('') + '</div>' +
+  '<div class="card" style="background:var(--gold-l);border-color:var(--gold)"><b>⚠ Recuerda:</b> <span style="font-size:14px">todo pago se hace por la app. Acordar pagos en efectivo puede terminar en bloqueo de la cuenta.</span></div>' +
+  '</div>' + tabsA('a_chats') + '</div>';
+},
+
+a_chat: function() {
+  var c = CHATS_A.filter(function(x){ return x.id === S.param; })[0] || CHATS_A[0];
+  return '<div class="screen">' + header(c.n, 'En línea', 'a_chats') +
+  '<div class="content grow" style="display:flex;flex-direction:column;gap:10px">' +
+  '<div class="bubble them">Hola Camila, confirmo que voy con todas las herramientas.<div class="btime">14:05</div></div>' +
+  '<div class="bubble me">¡Gracias! Te espero a las 15:00.<div class="btime">14:08 ✓✓</div></div>' +
+  '<div class="bubble them">' + c.last + '<div class="btime">' + c.t + ' </div></div>' +
+  '</div>' +
+  '<div style="padding:12px 16px 88px"><div class="row"><input placeholder="Escribe un mensaje…" id="msgin"><button class="btn primary" style="width:auto;padding:12px 16px" onclick="var i=document.getElementById(\'msgin\');if(i.value){toast(\'Enviado (mock)\');i.value=\'\'}">➤</button></div></div>' +
+  tabsA('a_chats') + '</div>';
+},
+
+a_notifs: function() {
+  S.notifRead = true; save();
+  return '<div class="screen">' + header('Notificaciones', null, 'a_home') +
+  '<div class="content">' +
+  NOTIFS.map(function(n){
+    var border = n.tipo === 'ok' ? 'var(--green)' : n.tipo === 'warn' ? 'var(--gold)' : 'var(--navy)';
+    return '<div class="card" style="border-left:4px solid ' + border + '"><b>' + n.t + '</b><div style="font-size:14px;margin:3px 0">' + n.d + '</div><div class="muted">' + n.when + '</div></div>';
+  }).join('') +
+  '</div>' + tabsA('a_home') + '</div>';
+},
+
+a_cuenta: function() {
+  return '<div class="screen">' + header('Mi cuenta', null, null) +
+  '<div class="content">' +
+  '<div class="card row"><div class="avatar" style="width:56px;height:56px">CR</div><div class="grow"><b>Camila Rojas</b><div class="muted">+56 9 8765 4321 · camila@mail.cl</div></div><span class="chip ok">✔</span></div>' +
+  '<div class="section-t">Preferencias</div><div class="card" style="padding:4px 14px">' +
+  [['push','Notificaciones push'],['sms','Avisos por SMS'],['mail','Resumen por correo']].map(function(p){
+    return '<div class="item" style="cursor:default"><div class="grow">' + p[1] + '</div><div class="switch ' + (S.prefs[p[0]] ? 'on' : '') + '" onclick="S.prefs[\'' + p[0] + '\']=!S.prefs[\'' + p[0] + '\'];save();render()"></div></div>';
+  }).join('') + '</div>' +
+  '<div class="section-t">Pago</div><div class="card" style="padding:4px 14px">' +
+  '<div class="item" onclick="toast(\'Gestión de tarjetas: próxima iteración\')"><span style="font-size:20px">💳</span><div class="grow">Visa ···· 4523 <span class="muted">vence 09/28</span></div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">➕</span><div class="grow">Agregar tarjeta</div><span class="muted">›</span></div></div>' +
+  '<div class="section-t">Otros</div><div class="card" style="padding:4px 14px">' +
+  '<div class="item" onclick="toast(\'Centro de ayuda: próxima iteración\')"><span style="font-size:20px">❓</span><div class="grow">Centro de ayuda</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'changelog\')"><span style="font-size:20px">🧪</span><div class="grow">Acerca de este prototipo</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'rol\')"><span style="font-size:20px">🚪</span><div class="grow" style="color:var(--red)">Cambiar de modo / salir</div></div></div>' +
+  '</div>' + tabsA('a_cuenta') + '</div>';
+},
+
+/* ===== FLUJO PROFESIONAL (fundación — se profundiza en próximas iteraciones) ===== */
+b_panel: function() {
+  return '<div class="screen">' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'rol\')">‹</div><div class="grow"><div class="sub">Buenos días, Roberto</div><h1>Trabajos cerca de ti</h1></div><span class="chip ok">● Disponible</span></div>' +
+  '<div class="row" style="margin-top:10px;gap:8px"><span class="chip info" style="background:rgba(255,255,255,.15);color:#fff">Radio: 5 km ▾</span><span class="chip info" style="background:rgba(255,255,255,.15);color:#fff">Carpintería ▾</span></div></div>' +
+  '<div class="content">' +
+  '<div class="muted">2 solicitudes activas en tu zona</div>' +
+  '<div class="card gold"><div class="row"><span class="chip bad">Urgente · hoy</span><span class="grow"></span><span class="muted">a 0,8 km</span></div>' +
+  '<b style="display:block;margin:8px 0 2px">Reparar puerta de closet descolgada</b><span class="money">Ref: $30.000</span>' +
+  '<div class="muted" style="margin:4px 0 10px">Puerta de riel salida, dormitorio principal. Ñuñoa.</div>' +
+  '<div class="row"><button class="btn primary" onclick="toast(\'Postulación: próxima iteración\')">Postular con monto</button></div></div>' +
+  '<div class="card"><div class="row"><span class="chip warn">Esta semana</span><span class="grow"></span><span class="muted">a 2,4 km</span></div>' +
+  '<b style="display:block;margin:8px 0 2px">Instalar repisas flotantes (x3)</b><span class="money">Ref: $45.000</span>' +
+  '<div class="muted" style="margin:4px 0 10px">Living, muro de concreto. Providencia.</div>' +
+  '<div class="row"><button class="btn primary" onclick="toast(\'Postulación: próxima iteración\')">Postular con monto</button></div></div>' +
+  '</div>' + tabsB('b_panel') + '</div>';
+},
+
+b_agenda: function() {
+  return '<div class="screen">' + header('Agenda', 'Agosto 2026', null) +
+  '<div class="content">' +
+  '<div class="card"><div class="grid2" style="grid-template-columns:repeat(6,1fr);text-align:center;font-size:13px">' +
+  ['Lu 10','Ma 11','Mi 12','Ju 13','Vi 14','Sá 15'].map(function(d, i){
+    return '<div style="padding:8px 2px;border-radius:10px;' + (i === 2 ? 'background:var(--gold);color:#fff;font-weight:800' : '') + '">' + d.replace(' ', '<br><b>') + '</b></div>';
+  }).join('') + '</div></div>' +
+  '<div class="section-t">Miércoles 12 · 2 trabajos</div>' +
+  '<div class="card" style="border-left:4px solid var(--green)"><div class="row"><b class="grow">Lavado de auto · Camila R.</b><span class="chip ok">Confirmado</span></div><div class="muted">10:00–12:00 · Av. Irarrázaval 3421, Ñuñoa</div><div class="money" style="margin-top:4px">$25.000</div></div>' +
+  '<div class="card" style="border:1.5px dashed var(--line);text-align:center" class="muted"><span class="muted">Bloque libre · 13:00–15:00</span></div>' +
+  '<div class="card" style="border-left:4px solid var(--gold)"><div class="row"><b class="grow">Puerta de closet · Jorge P.</b><span class="chip warn">Por confirmar</span></div><div class="muted">15:00–17:00 · Los Alerces 1180, Macul</div>' +
+  '<div class="row" style="margin-top:10px;gap:8px"><button class="btn primary" style="padding:10px" onclick="toast(\'Confirmación: próxima iteración\')">Confirmar horario</button><button class="btn ghost" style="padding:10px" onclick="toast(\'Próxima iteración\')">Proponer otro</button></div></div>' +
+  '</div>' + tabsB('b_agenda') + '</div>';
+},
+
+b_chats: function() {
+  return '<div class="screen">' + header('Mensajes', null, null) +
+  '<div class="content"><div class="card" style="padding:4px 14px">' +
+  '<div class="item" onclick="toast(\'Chat trabajador: próxima iteración\')"><div class="avatar">CR</div><div class="grow"><b>Camila Rojas</b><div class="muted">Perfecto, te espero a las 15:00 👍</div></div><div class="muted">14:08</div></div>' +
+  '<div class="item" onclick="toast(\'Chat trabajador: próxima iteración\')"><div class="avatar">JP</div><div class="grow"><b>Jorge P.</b><div class="muted">¿Puedes el miércoles en la tarde?</div></div><div class="muted">Ayer</div></div>' +
+  '</div>' +
+  '<div class="card" style="background:var(--gold-l);border-color:var(--gold)"><b>⚠ Recuerda:</b> <span style="font-size:14px">acordar pagos fuera de la app está prohibido y puede terminar en bloqueo de tu cuenta.</span></div>' +
+  '</div>' + tabsB('b_chats') + '</div>';
+},
+
+b_perfil: function() {
+  return '<div class="screen">' + header('Mi perfil', null, null) +
+  '<div class="content">' +
+  '<div class="card row"><div class="avatar" style="width:56px;height:56px">RD</div><div class="grow"><b>Roberto Díaz</b><div class="muted">Carpintero · Ñuñoa</div><div class="stars">★ 4,9 <span class="muted">(112 opiniones)</span></div></div><span class="chip ok">✔ Verificado</span></div>' +
+  '<div class="grid2">' +
+  '<div class="card" style="text-align:center"><div class="muted">Retenido</div><b style="font-size:18px">$37.500</b></div>' +
+  '<div class="card" style="text-align:center;background:var(--green-l);border-color:var(--green)"><div class="muted">Disponible</div><b style="font-size:18px;color:var(--green)">$142.800</b></div></div>' +
+  '<button class="btn gold" onclick="toast(\'Retiro: próxima iteración\')">Retirar a Cta. Banco Estado ···890</button>' +
+  '<div class="section-t">Mi cuenta</div><div class="card" style="padding:4px 14px">' +
+  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🧰</span><div class="grow">Mis oficios y radio de trabajo</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🖼</span><div class="grow">Galería de trabajos</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">⭐</span><div class="grow">Reputación y sanciones</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'rol\')"><span style="font-size:20px">🚪</span><div class="grow" style="color:var(--red)">Cambiar de modo / salir</div></div></div>' +
+  '</div>' + tabsB('b_perfil') + '</div>';
+},
+
+changelog: function() {
+  return '<div class="screen">' + header('PROFESSION v2', 'Prototipo en desarrollo continuo', 'rol') +
+  '<div class="content">' +
+  '<div class="card gold"><b>Iteración 1 — Fundación</b><div class="muted" style="margin-top:6px">' +
+  '• App reconstruida con código propio extensible<br>' +
+  '• Selección de rol + navegación completa por tabs<br>' +
+  '• Cliente: home, lista por oficio, perfil del maestro, publicar, mis servicios, mensajes + chat, notificaciones, mi cuenta con preferencias<br>' +
+  '• Profesional: panel, agenda, mensajes, perfil con billetera<br>' +
+  '• Estado persistente y URL ?reset</div></div>' +
+  '<div class="card"><b>Próximas iteraciones</b><div class="muted" style="margin-top:6px">Flujo completo de solicitud → propuestas → chat → precio → pago · registro profesional con verificación · postulación y establecer precio · billetera detallada · reputación/sanciones · disputas</div></div>' +
+  '<div class="muted" style="text-align:center">La v1 del test de usuarios sigue intacta en su URL original.</div>' +
+  '</div></div>';
+}
+};
+
+function render() {
+  var fn = SCREENS[S.screen] || SCREENS.rol;
+  document.getElementById('app').innerHTML = fn();
+}
+render();
+</script>
+</body>
+</html>
