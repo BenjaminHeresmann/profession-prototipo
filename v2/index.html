@@ -72,7 +72,7 @@ label{font-size:13px;font-weight:700;margin-bottom:5px;display:block}
 </head>
 <body>
 <div id="app"></div>
-<div class="badge-v" onclick="go('changelog')">v2 · iter 4</div>
+<div class="badge-v" onclick="go('changelog')">v2 · iter 5</div>
 <script>
 /* ============ PROFESSION v2 — SPA propia, extensible ============ */
 /* Estado global persistente */
@@ -174,10 +174,11 @@ a_home: function() {
   '<div class="sub">Hola, Camila 👋</div><h1>¿Qué necesitas hoy?</h1></div>' +
   '<div style="position:relative;cursor:pointer" onclick="go(\'a_notifs\')"><span style="font-size:22px">🔔</span>' +
   (S.notifRead ? '' : '<span class="notif-dot" style="position:absolute;top:0;right:0"></span>') + '</div></div>' +
-  '<div style="margin-top:12px"><input placeholder="🔎 Buscar oficio, ej: gasfitería" onfocus="toast(\'Búsqueda: próxima iteración\')"></div></div>' +
+  '<div style="margin-top:12px"><input id="q" placeholder="🔎 Buscar oficio, ej: gasfitería" value="' + (S.q || '') + '" oninput="S.q=this.value;save();qFilter()"></div></div>' +
   '<div class="content">' +
-  '<div class="section-t">Oficios</div><div class="grid3">' +
-  CATS.map(function(c){ return '<div class="cat" onclick="go(\'a_lista\',\'' + c.n + '\')"><div class="ico" style="background:' + c.c + '22;color:' + c.c + '">' + c.n[0] + '</div><span>' + c.n + '</span></div>'; }).join('') + '</div>' +
+  '<div class="section-t">Oficios</div><div class="grid3" id="catgrid">' +
+  CATS.map(function(c){ return '<div class="cat" data-n="' + c.n.toLowerCase() + '" onclick="go(\'a_lista\',\'' + c.n + '\')"><div class="ico" style="background:' + c.c + '22;color:' + c.c + '">' + c.n[0] + '</div><span>' + c.n + '</span></div>'; }).join('') + '</div>' +
+  '<div id="qempty" style="display:none" class="card"><div style="text-align:center"><b>Sin resultados para tu búsqueda</b><div class="muted" style="margin:6px 0 12px">Prueba con otro término o publica tu solicitud describiendo lo que necesitas.</div><button class="btn primary" onclick="go(\'a_publicar\')">Publicar solicitud</button></div></div>' +
   '<div class="card" style="background:var(--navy);color:#fff"><div class="row"><div class="grow"><b>¿No sabes qué oficio necesitas?</b><div style="font-size:13px;opacity:.85">Publica tu solicitud y recibe propuestas.</div></div><button class="btn gold" style="width:auto;padding:10px 18px" onclick="go(\'a_publicar\')">Publicar</button></div></div>' +
   '<div class="section-t">Cerca de ti</div>' + PROS.slice(0,2).map(proCard).join('') +
   '</div>' + tabsA('a_home') + '</div>';
@@ -211,7 +212,7 @@ a_pro: function() {
   '<div class="card"><div class="stars">★★★★★</div><div style="font-size:14px;margin:4px 0">"Impecable, puntual y muy ordenado. Volvería a contratarlo."</div><div class="muted">Marcela V. · Providencia · 04/08/26</div></div>' +
   '<div class="card"><div class="stars">★★★★☆</div><div style="font-size:14px;margin:4px 0">"Buen trabajo, llegó con algo de atraso pero avisó."</div><div class="muted">Jorge P. · Macul · 30/03/26</div></div>' +
   '<button class="btn primary" onclick="if(!S.sol){S.sol={t:\'Puerta de closet\',oficio:\'Carpintería\',estado:\'Negociando\'};save()}go(\'a_nego\',1)">Contactar y pedir precio</button>' +
-  '<button class="btn ghost" onclick="toast(\'Agenda: próxima iteración\')">Programar servicio</button>' +
+  '<button class="btn ghost" onclick="go(\'a_agendar\',' + p.id + ')">Programar servicio</button>' +
   '</div>' + tabsA('a_home') + '</div>';
 },
 
@@ -472,9 +473,10 @@ b_reg3: function() {
   var subs = ['Muebles a medida','Puertas y ventanas','Terrazas y deck','Reparaciones'];
   S.subs = S.subs || { 'Muebles a medida': true, 'Puertas y ventanas': true };
   var any = Object.keys(S.oficios).some(function(k){ return S.oficios[k]; });
+  var editMode = !!S.regDone;
   return '<div class="screen">' +
-  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'b_reg2\')">‹</div><div class="grow"><h1 style="font-size:18px">¿En qué trabajas?</h1></div></div>' +
-  '<div class="row" style="margin-top:6px;gap:4px">' + [1,1,1,1,0].map(function(x){ return '<div class="grow" style="height:4px;border-radius:99px;background:' + (x ? 'var(--gold)' : 'rgba(255,255,255,.25)') + '"></div>'; }).join('') + '</div></div>' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'' + (editMode ? 'b_perfil' : 'b_reg2') + '\')">‹</div><div class="grow"><h1 style="font-size:18px">' + (editMode ? 'Mis oficios y radio' : '¿En qué trabajas?') + '</h1></div></div>' +
+  (editMode ? '' : '<div class="row" style="margin-top:6px;gap:4px">' + [1,1,1,1,0].map(function(x){ return '<div class="grow" style="height:4px;border-radius:99px;background:' + (x ? 'var(--gold)' : 'rgba(255,255,255,.25)') + '"></div>'; }).join('') + '</div>') + '</div>' +
   '<div class="content">' +
   '<div class="muted">Elige tu oficio principal y marca lo que sabes hacer.</div>' +
   CATS.slice(0, 4).map(function(c){
@@ -486,7 +488,7 @@ b_reg3: function() {
   }).join('') +
   '<div class="card"><div class="row"><b class="grow">Radio de trabajo</b><b>' + S.radio + ' km</b></div>' +
   '<input type="range" min="1" max="15" value="' + S.radio + '" oninput="S.radio=this.value;save();this.previousElementSibling.lastElementChild.textContent=this.value+\' km\'" style="padding:0;margin-top:10px"></div>' +
-  '<button class="btn primary"' + (any ? '' : ' disabled') + ' onclick="S.regDone=true;save();toast(\'¡Cuenta creada! Bienvenido, Roberto\');go(\'b_panel\')">Crear mi cuenta de profesional</button>' +
+  '<button class="btn primary"' + (any ? '' : ' disabled') + ' onclick="if(S.regDone){toast(\'Cambios guardados ✓\');go(\'b_perfil\')}else{S.regDone=true;save();toast(\'¡Cuenta creada! Bienvenido, Roberto\');go(\'b_panel\')}">' + (editMode ? 'Guardar cambios' : 'Crear mi cuenta de profesional') + '</button>' +
   '</div></div>';
 },
 
@@ -592,17 +594,22 @@ b_panel: function() {
 },
 
 b_agenda: function() {
+  S.bDia = S.bDia === undefined ? 2 : S.bDia;
+  var nombres = ['Lunes 10','Martes 11','Miércoles 12','Jueves 13','Viernes 14','Sábado 15'];
+  var vacio = S.bDia !== 2;
   return '<div class="screen">' + header('Agenda', 'Agosto 2026', null) +
   '<div class="content">' +
   '<div class="card"><div class="grid2" style="grid-template-columns:repeat(6,1fr);text-align:center;font-size:13px">' +
   ['Lu 10','Ma 11','Mi 12','Ju 13','Vi 14','Sá 15'].map(function(d, i){
-    return '<div style="padding:8px 2px;border-radius:10px;' + (i === 2 ? 'background:var(--gold);color:#fff;font-weight:800' : '') + '">' + d.replace(' ', '<br><b>') + '</b></div>';
+    return '<div style="padding:8px 2px;border-radius:10px;cursor:pointer;' + (i === S.bDia ? 'background:var(--gold);color:#fff;font-weight:800' : '') + '" onclick="S.bDia=' + i + ';save();render()">' + d.replace(' ', '<br><b>') + '</b></div>';
   }).join('') + '</div></div>' +
-  '<div class="section-t">Miércoles 12 · 2 trabajos</div>' +
-  '<div class="card" style="border-left:4px solid var(--green)"><div class="row"><b class="grow">Lavado de auto · Camila R.</b><span class="chip ok">Confirmado</span></div><div class="muted">10:00–12:00 · Av. Irarrázaval 3421, Ñuñoa</div><div class="money" style="margin-top:4px">$25.000</div></div>' +
-  '<div class="card" style="border:1.5px dashed var(--line);text-align:center" class="muted"><span class="muted">Bloque libre · 13:00–15:00</span></div>' +
-  '<div class="card" style="border-left:4px solid var(--gold)"><div class="row"><b class="grow">Puerta de closet · Jorge P.</b><span class="chip warn">Por confirmar</span></div><div class="muted">15:00–17:00 · Los Alerces 1180, Macul</div>' +
-  '<div class="row" style="margin-top:10px;gap:8px"><button class="btn primary" style="padding:10px" onclick="toast(\'Confirmación: próxima iteración\')">Confirmar horario</button><button class="btn ghost" style="padding:10px" onclick="toast(\'Próxima iteración\')">Proponer otro</button></div></div>' +
+  (vacio
+    ? '<div class="card" style="text-align:center;padding:26px"><div style="font-size:26px">📅</div><b>' + nombres[S.bDia] + ' · sin trabajos</b><div class="muted" style="margin:6px 0 12px">Los trabajos que confirmes aparecerán aquí. Marca tus bloques no disponibles para no recibir solicitudes.</div><button class="btn ghost" onclick="toast(\'Bloqueo de horarios (mock)\')">Marcar como no disponible</button></div>'
+    : '<div class="section-t">Miércoles 12 · 2 trabajos</div>' +
+      '<div class="card" style="border-left:4px solid var(--green)"><div class="row"><b class="grow">Lavado de auto · Camila R.</b><span class="chip ok">Confirmado</span></div><div class="muted">10:00–12:00 · Av. Irarrázaval 3421, Ñuñoa</div><div class="money" style="margin-top:4px">$25.000</div></div>' +
+      '<div class="card" style="border:1.5px dashed var(--line);text-align:center"><span class="muted">Bloque libre · 13:00–15:00</span></div>' +
+      '<div class="card" style="border-left:4px solid var(--gold)"><div class="row"><b class="grow">Puerta de closet · Jorge P.</b><span class="chip warn">Por confirmar</span></div><div class="muted">15:00–17:00 · Los Alerces 1180, Macul</div>' +
+      '<div class="row" style="margin-top:10px;gap:8px"><button class="btn primary" style="padding:10px" onclick="toast(\'Horario confirmado ✓\')">Confirmar horario</button><button class="btn ghost" style="padding:10px" onclick="toast(\'Propuesta de nuevo horario enviada\')">Proponer otro</button></div></div>') +
   '</div>' + tabsB('b_agenda') + '</div>';
 },
 
@@ -625,12 +632,40 @@ b_perfil: function() {
   '<div class="card" style="text-align:center;background:var(--green-l);border-color:var(--green)"><div class="muted">Disponible</div><b style="font-size:18px;color:var(--green)">$142.800</b></div></div>' +
   '<button class="btn gold" onclick="go(\'b_billetera\')">Ver billetera y movimientos</button>' +
   '<div class="section-t">Mi cuenta</div><div class="card" style="padding:4px 14px">' +
-  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🧰</span><div class="grow">Mis oficios y radio de trabajo</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'b_reg3\')"><span style="font-size:20px">🧰</span><div class="grow">Mis oficios y radio de trabajo</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🖼</span><div class="grow">Galería de trabajos</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'b_reputacion\')"><span style="font-size:20px">⭐</span><div class="grow">Reputación y sanciones</div><span class="chip bad" style="font-size:10px">1</span><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'b_notifs\')"><span style="font-size:20px">🔔</span><div class="grow">Notificaciones</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'rol\')"><span style="font-size:20px">🚪</span><div class="grow" style="color:var(--red)">Cambiar de modo / salir</div></div></div>' +
   '</div>' + tabsB('b_perfil') + '</div>';
+},
+
+a_agendar: function() {
+  var p = PROS.filter(function(x){ return x.id === S.param; })[0] || PROS[0];
+  S.agDia = S.agDia === undefined ? -1 : S.agDia;
+  S.agHora = S.agHora === undefined ? -1 : S.agHora;
+  var dias = [['Lu','10'],['Ma','11'],['Mi','12'],['Ju','13'],['Vi','14'],['Sá','15']];
+  var horas = ['09:00','10:00','11:00','14:00','15:00','16:00'];
+  var ocupadas = { 2: ['10:00','15:00'], 3: ['09:00'] };
+  var listo = S.agDia >= 0 && S.agHora >= 0;
+  return '<div class="screen">' + header('Programar servicio', p.n + ' · ' + p.cat, 'a_pro') +
+  '<div class="content">' +
+  '<div class="card"><b style="display:block;margin-bottom:10px">Agosto 2026</b><div class="grid3" style="grid-template-columns:repeat(6,1fr)">' +
+  dias.map(function(d, i){
+    var sel = S.agDia === i;
+    return '<div style="text-align:center;padding:8px 2px;border-radius:10px;cursor:pointer;' + (sel ? 'background:var(--gold);color:#fff;font-weight:800' : 'background:var(--bg)') + '" onclick="S.agDia=' + i + ';S.agHora=-1;save();render()">' + d[0] + '<br><b>' + d[1] + '</b></div>';
+  }).join('') + '</div></div>' +
+  (S.agDia >= 0 ? '<div class="section-t">Horarios disponibles</div><div class="grid3">' +
+  horas.map(function(h, i){
+    var occ = (ocupadas[S.agDia] || []).indexOf(h) !== -1;
+    var sel = S.agHora === i;
+    if (occ) return '<div class="chip info" style="justify-content:center;padding:10px;opacity:.4;text-decoration:line-through">' + h + '</div>';
+    return '<div class="chip ' + (sel ? 'ok' : 'info') + '" style="justify-content:center;padding:10px;cursor:pointer;' + (sel ? 'outline:2px solid var(--green)' : '') + '" onclick="S.agHora=' + i + ';save();render()">' + h + '</div>';
+  }).join('') + '</div>' : '<div class="muted" style="text-align:center">Elige un día para ver los horarios de ' + p.n.split(' ')[0] + '.</div>') +
+  '<div class="card" style="background:#E8EDF5;font-size:13.5px">Al programar, ' + p.n.split(' ')[0] + ' recibirá tu solicitud y el precio se acuerda por chat antes de confirmar.</div>' +
+  '<div class="grow"></div>' +
+  '<button class="btn primary"' + (listo ? '' : ' disabled') + ' onclick="agConfirm()">Confirmar programación</button>' +
+  '</div></div>';
 },
 
 b_reputacion: function() {
@@ -716,7 +751,12 @@ ayuda: function() {
 changelog: function() {
   return '<div class="screen">' + header('PROFESSION v2', 'Prototipo en desarrollo continuo', 'rol') +
   '<div class="content">' +
-  '<div class="card gold"><b>Iteración 4 — Reputación, notificaciones y ayuda</b><div class="muted" style="margin-top:6px">' +
+  '<div class="card gold"><b>Iteración 5 — Agenda, búsqueda y edición de perfil</b><div class="muted" style="margin-top:6px">' +
+  '• "Programar servicio" desde el perfil del maestro: calendario + horarios (con ocupados) → crea la solicitud y abre el chat<br>' +
+  '• Búsqueda de oficios en vivo en el home con estado vacío útil<br>' +
+  '• Agenda del profesional interactiva por día, con estado vacío y bloqueo de horarios<br>' +
+  '• Edición de "Mis oficios y radio" reutilizando el paso de registro</div></div>' +
+  '<div class="card"><b>Iteración 4 — Reputación, notificaciones y ayuda</b><div class="muted" style="margin-top:6px">' +
   '• Reputación del profesional: distribución de notas + sanción activa con la matriz real (48 hrs → 15-30 días → eliminación) y apelación<br>' +
   '• Notificaciones del profesional por tipo (trabajo, mensaje, pago, sanción)<br>' +
   '• Detalle de servicios históricos con boleta y "volver a contratar"<br>' +
@@ -745,6 +785,20 @@ changelog: function() {
 }
 };
 
+/* ---- Búsqueda home ---- */
+function qFilter() {
+  var q = (S.q || '').toLowerCase().trim();
+  var any = false;
+  var cards = document.querySelectorAll('#catgrid .cat');
+  for (var i = 0; i < cards.length; i++) {
+    var show = !q || cards[i].getAttribute('data-n').indexOf(q) !== -1;
+    cards[i].style.display = show ? '' : 'none';
+    if (show) any = true;
+  }
+  var empty = document.getElementById('qempty');
+  if (empty) empty.style.display = (q && !any) ? '' : 'none';
+}
+
 /* ---- Registro profesional ---- */
 function rutOk(v) {
   var c = (v || '').replace(/[.\-\s]/g, '').toUpperCase();
@@ -761,6 +815,14 @@ function rutLive(v) {
   var ok = rutOk(v);
   document.getElementById('rutmsg').innerHTML = v ? (ok ? '<span class="chip ok">✓ RUT válido</span>' : '<span class="chip bad">RUT incompleto o inválido</span>') : '';
   document.getElementById('rutbtn').disabled = !ok;
+}
+function agConfirm() {
+  var dias = ['Lu 10','Ma 11','Mi 12','Ju 13','Vi 14','Sá 15'];
+  var horas = ['09:00','10:00','11:00','14:00','15:00','16:00'];
+  S.sol = { t: 'Servicio programado', oficio: 'Carpintería', estado: 'Negociando', fecha: dias[S.agDia] + ' ago · ' + horas[S.agHora] };
+  S.agDia = -1; S.agHora = -1; save();
+  toast('Solicitud enviada a Roberto — acuerden el precio por chat');
+  go('a_nego', 1);
 }
 function verifNext() {
   S.verifStep = (S.verifStep || 0) + 1; save();
