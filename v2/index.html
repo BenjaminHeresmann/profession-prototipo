@@ -72,7 +72,7 @@ label{font-size:13px;font-weight:700;margin-bottom:5px;display:block}
 </head>
 <body>
 <div id="app"></div>
-<div class="badge-v" onclick="go('changelog')">v2 · iter 2</div>
+<div class="badge-v" onclick="go('changelog')">v2 · iter 3</div>
 <script>
 /* ============ PROFESSION v2 — SPA propia, extensible ============ */
 /* Estado global persistente */
@@ -163,7 +163,7 @@ rol: function() {
   '<div style="opacity:.85;font-size:14px">El profesionalismo no es un título,<br>es cómo se hace cada tarea.</div></div>' +
   '<div style="display:flex;flex-direction:column;gap:12px">' +
   '<div class="card gold" style="cursor:pointer" onclick="go(\'a_home\')"><div class="row"><span style="font-size:26px">🔍</span><div class="grow"><b>Quiero solicitar un servicio</b><div class="muted">Encuentra maestros verificados cerca tuyo</div></div><span style="color:var(--gold);font-size:20px">›</span></div></div>' +
-  '<div class="card gold" style="cursor:pointer" onclick="go(\'b_panel\')"><div class="row"><span style="font-size:26px">🛠</span><div class="grow"><b>Quiero trabajar con PROFESSION</b><div class="muted">Recibe trabajos cercanos y cobra seguro</div></div><span style="color:var(--gold);font-size:20px">›</span></div></div>' +
+  '<div class="card gold" style="cursor:pointer" onclick="go(S.regDone?\'b_panel\':\'b_reg1\')"><div class="row"><span style="font-size:26px">🛠</span><div class="grow"><b>Quiero trabajar con PROFESSION</b><div class="muted">Recibe trabajos cercanos y cobra seguro</div></div><span style="color:var(--gold);font-size:20px">›</span></div></div>' +
   '<div style="text-align:center;color:#fff;opacity:.7;font-size:12.5px;margin-top:6px">Para trabajar necesitarás verificar tu identidad.</div></div></div>';
 },
 
@@ -426,7 +426,154 @@ a_cuenta: function() {
   '</div>' + tabsA('a_cuenta') + '</div>';
 },
 
-/* ===== FLUJO PROFESIONAL (fundación — se profundiza en próximas iteraciones) ===== */
+/* ===== REGISTRO PROFESIONAL ===== */
+b_reg1: function() {
+  var v = S.rutIn || '';
+  var ok = rutOk(v);
+  return '<div class="screen">' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'rol\')">‹</div><div class="grow"><h1 style="font-size:18px">Crear cuenta de profesional</h1></div></div>' +
+  '<div class="row" style="margin-top:10px"><span class="sub grow">Paso 2 de 5</span><span class="sub">Tus datos</span></div>' +
+  '<div class="row" style="margin-top:6px;gap:4px">' + [1,1,0,0,0].map(function(x){ return '<div class="grow" style="height:4px;border-radius:99px;background:' + (x ? 'var(--gold)' : 'rgba(255,255,255,.25)') + '"></div>'; }).join('') + '</div></div>' +
+  '<div class="content">' +
+  '<h2>¿Cuál es tu RUT?</h2>' +
+  '<div class="muted">Lo usamos para verificar tu identidad. Nadie más lo verá.</div>' +
+  '<input id="rutin" inputmode="text" placeholder="12.345.678-9" value="' + v + '" oninput="S.rutIn=this.value;save();rutLive(this.value)" style="font-size:20px;letter-spacing:1px">' +
+  '<div id="rutmsg">' + (v ? (ok ? '<span class="chip ok">✓ RUT válido</span>' : '<span class="chip bad">RUT incompleto o inválido</span>') : '') + '</div>' +
+  '<div class="grow"></div>' +
+  '<button class="btn primary" id="rutbtn"' + (ok ? '' : ' disabled') + ' onclick="go(\'b_reg2\')">Continuar</button>' +
+  '<div class="muted" style="text-align:center;font-size:12px">En el producto real: nombre → RUT → nacimiento → teléfono → email.</div>' +
+  '</div></div>';
+},
+
+b_reg2: function() {
+  S.verifStep = S.verifStep || 0;
+  var pasos = [['📸','Foto de perfil en vivo'],['🪪','Cédula de identidad — ambos lados'],['🙂','Reconocimiento facial'],['📄','Certificado de antecedentes']];
+  var allDone = S.verifStep >= pasos.length;
+  return '<div class="screen">' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'b_reg1\')">‹</div><div class="grow"><h1 style="font-size:18px">Verificación de identidad</h1></div></div>' +
+  '<div class="row" style="margin-top:6px;gap:4px">' + [1,1,1,0,0].map(function(x){ return '<div class="grow" style="height:4px;border-radius:99px;background:' + (x ? 'var(--gold)' : 'rgba(255,255,255,.25)') + '"></div>'; }).join('') + '</div></div>' +
+  '<div class="content">' +
+  '<div class="card" style="background:#E8EDF5;font-size:14px">Normalmente esto tarda hasta 48 hrs — para este prototipo lo aprobamos de inmediato.</div>' +
+  pasos.map(function(p, i){
+    var done = i < S.verifStep;
+    var current = i === S.verifStep;
+    return '<div class="card' + (current ? ' gold' : '') + '"' + (current ? ' style="cursor:pointer" onclick="verifNext()"' : '') + '><div class="row">' +
+    '<span style="font-size:22px">' + (done ? '✅' : p[0]) + '</span>' +
+    '<div class="grow"><b>' + p[1] + '</b><div class="muted">' + (done ? 'Aprobado' : current ? 'Toca para simular este paso' : 'Pendiente') + '</div></div>' +
+    (done ? '<span class="chip ok">Listo</span>' : current ? '<span class="chip warn">›</span>' : '') + '</div></div>';
+  }).join('') +
+  '<button class="btn primary"' + (allDone ? '' : ' disabled') + ' onclick="go(\'b_reg3\')">Continuar</button>' +
+  '</div></div>';
+},
+
+b_reg3: function() {
+  S.oficios = S.oficios || { 'Carpintería': true };
+  S.radio = S.radio || 5;
+  var subs = ['Muebles a medida','Puertas y ventanas','Terrazas y deck','Reparaciones'];
+  S.subs = S.subs || { 'Muebles a medida': true, 'Puertas y ventanas': true };
+  var any = Object.keys(S.oficios).some(function(k){ return S.oficios[k]; });
+  return '<div class="screen">' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'b_reg2\')">‹</div><div class="grow"><h1 style="font-size:18px">¿En qué trabajas?</h1></div></div>' +
+  '<div class="row" style="margin-top:6px;gap:4px">' + [1,1,1,1,0].map(function(x){ return '<div class="grow" style="height:4px;border-radius:99px;background:' + (x ? 'var(--gold)' : 'rgba(255,255,255,.25)') + '"></div>'; }).join('') + '</div></div>' +
+  '<div class="content">' +
+  '<div class="muted">Elige tu oficio principal y marca lo que sabes hacer.</div>' +
+  CATS.slice(0, 4).map(function(c){
+    var on = !!S.oficios[c.n];
+    return '<div class="card' + (on ? ' gold' : '') + '"><div class="row" style="cursor:pointer" onclick="S.oficios[\'' + c.n + '\']=!S.oficios[\'' + c.n + '\'];save();render()">' +
+    '<div class="cat" style="border:none;padding:0"><div class="ico" style="background:' + c.c + '22;color:' + c.c + ';margin:0">' + c.n[0] + '</div></div>' +
+    '<b class="grow">' + c.n + '</b><span class="chip ' + (on ? 'ok' : 'info') + '">' + (on ? '✓' : '+') + '</span></div>' +
+    (on && c.n === 'Carpintería' ? '<div class="row" style="flex-wrap:wrap;gap:6px;margin-top:10px">' + subs.map(function(sb){ return '<span class="chip ' + (S.subs[sb] ? 'info' : 'warn') + '" style="cursor:pointer;' + (S.subs[sb] ? 'background:var(--navy);color:#fff' : '') + '" onclick="S.subs[\'' + sb + '\']=!S.subs[\'' + sb + '\'];save();render()">' + sb + (S.subs[sb] ? ' ✓' : '') + '</span>'; }).join('') + '</div>' : '') + '</div>';
+  }).join('') +
+  '<div class="card"><div class="row"><b class="grow">Radio de trabajo</b><b>' + S.radio + ' km</b></div>' +
+  '<input type="range" min="1" max="15" value="' + S.radio + '" oninput="S.radio=this.value;save();this.previousElementSibling.lastElementChild.textContent=this.value+\' km\'" style="padding:0;margin-top:10px"></div>' +
+  '<button class="btn primary"' + (any ? '' : ' disabled') + ' onclick="S.regDone=true;save();toast(\'¡Cuenta creada! Bienvenido, Roberto\');go(\'b_panel\')">Crear mi cuenta de profesional</button>' +
+  '</div></div>';
+},
+
+/* ===== FLUJO PROFESIONAL ===== */
+b_postular: function() {
+  var m = S.postMonto === undefined ? 28000 : S.postMonto;
+  return '<div class="screen" style="background:rgba(22,41,74,.97);justify-content:flex-end">' +
+  '<div class="muted" style="color:#fff;text-align:center;padding:20px">Panel de trabajos — al fondo</div>' +
+  '<div style="background:#fff;border-radius:22px 22px 0 0;padding:22px 18px 30px;display:flex;flex-direction:column;gap:12px">' +
+  '<h2>Postular al trabajo</h2>' +
+  '<b>Reparar puerta de closet descolgada</b>' +
+  '<div class="muted">Ñuñoa · a 0,8 km · Ref. del cliente: $30.000</div>' +
+  '<div><label>Tu monto inicial (referencial, se afina por chat)</label>' +
+  '<input inputmode="numeric" value="' + m.toLocaleString('es-CL') + '" oninput="S.postMonto=parseInt(this.value.replace(/[^0-9]/g,\'\')||0,10);save()" style="font-size:22px;color:var(--green);font-weight:800"></div>' +
+  '<div class="muted" style="font-size:13px">El precio final se establece en el chat y lo confirma el cliente antes de pagar.</div>' +
+  '<button class="btn primary" onclick="toast(\'Postulación enviada\');go(\'b_nego\')">Enviar postulación</button>' +
+  '<button class="btn ghost" onclick="go(\'b_panel\')">Volver al panel</button>' +
+  '</div></div>';
+},
+
+b_nego: function() {
+  return '<div class="screen">' + header('Camila Rojas', 'En línea · Puerta de closet', 'b_panel') +
+  '<div class="content grow" style="display:flex;flex-direction:column;gap:10px">' +
+  '<div class="card" style="background:var(--gold-l);border-color:var(--gold);padding:10px"><span style="font-size:13px"><b>⚠</b> Todo pago se hace por la app. Acordar efectivo puede terminar en bloqueo de tu cuenta.</span></div>' +
+  '<div class="bubble them">Hola Roberto, ¿viste las fotos del riel?<div class="btime">10:28</div></div>' +
+  '<div class="bubble me">Sí, hay que cambiar el riel y ajustar la puerta. Con materiales te lo dejo en $' + ((S.postMonto || 28000).toLocaleString('es-CL')) + '.<div class="btime">10:32 ✓✓</div></div>' +
+  '<div class="bubble them">Ya, de acuerdo 👍<div class="btime">10:35</div></div>' +
+  '<div class="card" style="background:#E8EDF5;text-align:center;font-size:13.5px">¿Llegaron a acuerdo? Formaliza el monto para que Camila lo confirme.</div>' +
+  '<button class="btn primary" onclick="go(\'b_precio\')"><span style="color:var(--gold)">$</span> Establecer precio</button>' +
+  '</div>' + tabsB('b_chats') + '</div>';
+},
+
+b_precio: function() {
+  var v = S.precioDig || '';
+  var num = parseInt(v || '0', 10);
+  return '<div class="screen" style="background:rgba(22,41,74,.97);justify-content:flex-end">' +
+  '<div class="muted" style="color:#fff;text-align:center;padding:16px">Chat con Camila — al fondo</div>' +
+  '<div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 18px 26px;display:flex;flex-direction:column;gap:10px">' +
+  '<h2>Establecer precio</h2>' +
+  '<div class="muted" style="font-size:13.5px">Camila recibirá esta propuesta para confirmarla. Una vez confirmada, el precio no puede cambiar.</div>' +
+  '<div><label>¿Qué incluye el trabajo?</label><textarea rows="2">Cambio de riel y ajuste de puerta de closet, materiales incluidos.</textarea></div>' +
+  '<div class="card" style="background:var(--green-l);border-color:var(--green);text-align:center"><span class="money" style="font-size:32px">' + (num ? fmt(num) : '$ —') + '</span></div>' +
+  '<div class="grid3">' + ['1','2','3','4','5','6','7','8','9','←','0','⌫'].map(function(k){
+    if (k === '←') return '<button class="btn ghost" style="padding:12px" onclick="go(\'b_nego\')">Volver</button>';
+    if (k === '⌫') return '<button class="btn ghost" style="padding:12px" onclick="S.precioDig=(S.precioDig||\'\').slice(0,-1);save();render()">⌫</button>';
+    return '<button class="btn ghost" style="padding:12px;font-size:18px" onclick="if((S.precioDig||\'\').length<7){S.precioDig=(S.precioDig||\'\')+\'' + k + '\';save();render()}">' + k + '</button>';
+  }).join('') + '</div>' +
+  '<div class="muted" style="font-size:12.5px">Es el monto final que pagará el cliente. Tu comisión se descuenta al liberar el pago — la verás en tu <b>Billetera</b>.</div>' +
+  '<button class="btn primary"' + (num >= 1000 ? '' : ' disabled') + ' onclick="S.bMonto=parseInt(S.precioDig,10);S.bEstado=\'Confirmado\';save();toast(\'Camila confirmó tu precio ✓\');go(\'b_detalle\')">Enviar propuesta' + (num ? ' de ' + fmt(num) : '') + '</button>' +
+  '</div></div>';
+},
+
+b_detalle: function() {
+  var m = S.bMonto || 37500;
+  return '<div class="screen">' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'b_panel\')">‹</div><div class="grow"><h1 style="font-size:18px">Puerta de closet</h1><div class="sub">Hoy · 15:00 · #4219</div></div><span class="chip ok">Confirmado</span></div></div>' +
+  '<div class="content">' +
+  '<div class="card" style="background:var(--green-l);border-color:var(--green);font-size:14px"><b>✓ Camila confirmó tu precio de ' + fmt(m) + '.</b> Contrato cerrado.</div>' +
+  '<div style="height:110px;border-radius:14px;background:repeating-linear-gradient(45deg,#dfe6ef,#dfe6ef 10px,#eef2f7 10px,#eef2f7 20px);display:flex;align-items:center;justify-content:center" class="muted">mapa · ruta 12 min · 3,4 km</div>' +
+  '<div class="card row"><div class="avatar">CR</div><div class="grow"><b>Camila Rojas</b><div class="muted">Av. Irarrázaval 3421, Ñuñoa</div></div><span style="font-size:20px">✆</span></div>' +
+  '<div class="card"><div class="row"><span class="muted grow">Precio acordado</span><span class="money" style="font-size:20px">' + fmt(m) + '</span></div></div>' +
+  '<div class="card" style="background:var(--gold-l);border-color:var(--gold);font-size:13.5px"><b>!</b> El precio ya está cerrado y no puede cambiar en el lugar. Trabajo extra = nueva solicitud por la app.</div>' +
+  '<button class="btn primary" onclick="S.bEstado=\'En camino\';save();toast(\'Camila verá tu ubicación y ETA\');go(\'b_billetera\')">➤ Estoy en camino</button>' +
+  '</div>' + tabsB('b_panel') + '</div>';
+},
+
+b_billetera: function() {
+  var m = S.bMonto || 37500;
+  var com = Math.round(m * 0.12);
+  return '<div class="screen">' + header('Billetera', null, 'b_perfil') +
+  '<div class="content">' +
+  '<div class="grid2">' +
+  '<div class="card" style="text-align:center"><div class="muted">● Retenido</div><b style="font-size:19px">' + fmt(m) + '</b><div class="muted" style="font-size:11px">se libera al aprobar el trabajo</div></div>' +
+  '<div class="card" style="text-align:center;background:var(--green-l);border-color:var(--green)"><div class="muted">● Disponible</div><b style="font-size:19px;color:var(--green)">$142.800</b><div class="muted" style="font-size:11px">listo para retirar</div></div></div>' +
+  '<button class="btn gold" onclick="toast(\'Retiro procesado (mock)\')">Retirar a Cta. Banco Estado ···890</button>' +
+  '<div class="section-t">Movimientos</div>' +
+  '<div class="card"><div class="row"><b class="grow">Puerta de closet · Camila R.</b><span class="chip warn">Retenido</span></div>' +
+  '<div class="divider" style="margin:8px 0"></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow">Precio acordado</span><span>' + fmt(m) + '</span></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow">Comisión PROFESSION (12% <span class="chip info" style="font-size:10px">por definir</span>)</span><span style="color:var(--red)">−' + fmt(com) + '</span></div>' +
+  '<div class="row"><b class="grow">Recibirás</b><span class="money" style="font-size:17px">' + fmt(m - com) + '</span></div></div>' +
+  '<div class="card"><div class="row"><b class="grow">Mueble a medida · Marcela V.</b><span class="money">+$105.600</span></div><div class="muted">Liberado · 04/08/26</div></div>' +
+  '<div class="card"><div class="row"><b class="grow">Retiro a Banco Estado ···890</b><span style="color:var(--red);font-weight:700">−$80.000</span></div><div class="muted">01/08/26 · procesado</div></div>' +
+  '<div class="card" style="background:#E8EDF5;font-size:13.5px">La comisión siempre se muestra antes de aceptar un trabajo. Sin cobros ocultos.</div>' +
+  '</div>' + tabsB('b_perfil') + '</div>';
+},
+
 b_panel: function() {
   return '<div class="screen">' +
   '<div class="header"><div class="hrow"><div class="back" onclick="go(\'rol\')">‹</div><div class="grow"><div class="sub">Buenos días, Roberto</div><h1>Trabajos cerca de ti</h1></div><span class="chip ok">● Disponible</span></div>' +
@@ -436,11 +583,11 @@ b_panel: function() {
   '<div class="card gold"><div class="row"><span class="chip bad">Urgente · hoy</span><span class="grow"></span><span class="muted">a 0,8 km</span></div>' +
   '<b style="display:block;margin:8px 0 2px">Reparar puerta de closet descolgada</b><span class="money">Ref: $30.000</span>' +
   '<div class="muted" style="margin:4px 0 10px">Puerta de riel salida, dormitorio principal. Ñuñoa.</div>' +
-  '<div class="row"><button class="btn primary" onclick="toast(\'Postulación: próxima iteración\')">Postular con monto</button></div></div>' +
+  '<div class="row"><button class="btn primary" onclick="go(\'b_postular\')">Postular con monto</button></div></div>' +
   '<div class="card"><div class="row"><span class="chip warn">Esta semana</span><span class="grow"></span><span class="muted">a 2,4 km</span></div>' +
   '<b style="display:block;margin:8px 0 2px">Instalar repisas flotantes (x3)</b><span class="money">Ref: $45.000</span>' +
   '<div class="muted" style="margin:4px 0 10px">Living, muro de concreto. Providencia.</div>' +
-  '<div class="row"><button class="btn primary" onclick="toast(\'Postulación: próxima iteración\')">Postular con monto</button></div></div>' +
+  '<div class="row"><button class="btn primary" onclick="go(\'b_postular\')">Postular con monto</button></div></div>' +
   '</div>' + tabsB('b_panel') + '</div>';
 },
 
@@ -462,7 +609,7 @@ b_agenda: function() {
 b_chats: function() {
   return '<div class="screen">' + header('Mensajes', null, null) +
   '<div class="content"><div class="card" style="padding:4px 14px">' +
-  '<div class="item" onclick="toast(\'Chat trabajador: próxima iteración\')"><div class="avatar">CR</div><div class="grow"><b>Camila Rojas</b><div class="muted">Perfecto, te espero a las 15:00 👍</div></div><div class="muted">14:08</div></div>' +
+  '<div class="item" onclick="go(\'b_nego\')"><div class="avatar">CR</div><div class="grow"><b>Camila Rojas</b><div class="muted">Perfecto, te espero a las 15:00 👍</div></div><div class="muted">14:08</div></div>' +
   '<div class="item" onclick="toast(\'Chat trabajador: próxima iteración\')"><div class="avatar">JP</div><div class="grow"><b>Jorge P.</b><div class="muted">¿Puedes el miércoles en la tarde?</div></div><div class="muted">Ayer</div></div>' +
   '</div>' +
   '<div class="card" style="background:var(--gold-l);border-color:var(--gold)"><b>⚠ Recuerda:</b> <span style="font-size:14px">acordar pagos fuera de la app está prohibido y puede terminar en bloqueo de tu cuenta.</span></div>' +
@@ -476,7 +623,7 @@ b_perfil: function() {
   '<div class="grid2">' +
   '<div class="card" style="text-align:center"><div class="muted">Retenido</div><b style="font-size:18px">$37.500</b></div>' +
   '<div class="card" style="text-align:center;background:var(--green-l);border-color:var(--green)"><div class="muted">Disponible</div><b style="font-size:18px;color:var(--green)">$142.800</b></div></div>' +
-  '<button class="btn gold" onclick="toast(\'Retiro: próxima iteración\')">Retirar a Cta. Banco Estado ···890</button>' +
+  '<button class="btn gold" onclick="go(\'b_billetera\')">Ver billetera y movimientos</button>' +
   '<div class="section-t">Mi cuenta</div><div class="card" style="padding:4px 14px">' +
   '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🧰</span><div class="grow">Mis oficios y radio de trabajo</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🖼</span><div class="grow">Galería de trabajos</div><span class="muted">›</span></div>' +
@@ -488,7 +635,12 @@ b_perfil: function() {
 changelog: function() {
   return '<div class="screen">' + header('PROFESSION v2', 'Prototipo en desarrollo continuo', 'rol') +
   '<div class="content">' +
-  '<div class="card gold"><b>Iteración 2 — Flujo cliente completo</b><div class="muted" style="margin-top:6px">' +
+  '<div class="card gold"><b>Iteración 3 — Flujo profesional completo</b><div class="muted" style="margin-top:6px">' +
+  '• Registro: RUT con validación real (módulo 11), verificación por pasos, oficios con sub-especialidades y radio de trabajo<br>' +
+  '• Postulación con monto desde el panel → chat → "Establecer precio" con teclado numérico real<br>' +
+  '• El precio digitado viaja a detalle del servicio y billetera (comisión 12% calculada)<br>' +
+  '• Billetera con retenido/disponible y movimientos</div></div>' +
+  '<div class="card"><b>Iteración 2 — Flujo cliente completo</b><div class="muted" style="margin-top:6px">' +
   '• Publicar solicitud con datos reales (oficio, urgencia seleccionable, presupuesto)<br>' +
   '• Propuestas de maestros → chat de negociación → propuesta formal<br>' +
   '• Confirmación ceremonial de precio + pago protegido (escrow)<br>' +
@@ -506,6 +658,29 @@ changelog: function() {
   '</div></div>';
 }
 };
+
+/* ---- Registro profesional ---- */
+function rutOk(v) {
+  var c = (v || '').replace(/[.\-\s]/g, '').toUpperCase();
+  if (c.length < 8) return false;
+  var body = c.slice(0, -1), dv = c.slice(-1);
+  if (!/^\d+$/.test(body)) return false;
+  var sum = 0, mul = 2;
+  for (var i = body.length - 1; i >= 0; i--) { sum += parseInt(body[i], 10) * mul; mul = mul === 7 ? 2 : mul + 1; }
+  var res = 11 - (sum % 11);
+  var dvCalc = res === 11 ? '0' : res === 10 ? 'K' : String(res);
+  return dv === dvCalc;
+}
+function rutLive(v) {
+  var ok = rutOk(v);
+  document.getElementById('rutmsg').innerHTML = v ? (ok ? '<span class="chip ok">✓ RUT válido</span>' : '<span class="chip bad">RUT incompleto o inválido</span>') : '';
+  document.getElementById('rutbtn').disabled = !ok;
+}
+function verifNext() {
+  S.verifStep = (S.verifStep || 0) + 1; save();
+  toast('Revisando… aprobado ✓');
+  render();
+}
 
 /* ---- Acciones del flujo de solicitud ---- */
 function pubSol() {
