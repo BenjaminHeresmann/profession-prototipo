@@ -72,7 +72,7 @@ label{font-size:13px;font-weight:700;margin-bottom:5px;display:block}
 </head>
 <body>
 <div id="app"></div>
-<div class="badge-v" onclick="go('changelog')">v2 · iter 5</div>
+<div class="badge-v" onclick="go('changelog')">v2 · iter 6</div>
 <script>
 /* ============ PROFESSION v2 — SPA propia, extensible ============ */
 /* Estado global persistente */
@@ -305,7 +305,7 @@ a_pago: function() {
   '<div class="row"><b class="grow">Total a pagar</b><span class="money" style="font-size:18px">' + fmt(37500) + '</span></div></div>' +
   '<div class="section-t">Medio de pago</div>' +
   '<div class="card row" style="border-color:var(--navy)"><span style="font-size:20px">💳</span><div class="grow"><b>Visa ···· 4523</b><div class="muted">vence 09/28</div></div><span style="color:var(--navy)">●</span></div>' +
-  '<div class="card row" style="cursor:pointer" onclick="toast(\'Gestión de tarjetas: próxima iteración\')"><span style="font-size:20px">➕</span><div class="grow">Agregar otra tarjeta</div></div>' +
+  '<div class="card row" style="cursor:pointer" onclick="go(\'a_tarjetas\')"><span style="font-size:20px">➕</span><div class="grow">Agregar otra tarjeta</div></div>' +
   '<div class="card" style="background:var(--green-l);border-color:var(--green)"><div class="row"><span style="font-size:20px">🛡</span><div class="grow" style="font-size:14px"><b>Tu pago queda protegido.</b> No se lo entregamos a Roberto hasta que apruebes el trabajo.</div></div></div>' +
   '<button class="btn green" onclick="S.sol=S.sol||{};S.sol.estado=\'En curso\';save();toast(\'Pago retenido con éxito\');go(\'a_activo\')">Pagar ' + fmt(37500) + ' protegido</button>' +
   '<div class="muted" style="text-align:center;font-size:12px">Pago seguro. Nunca pagues en efectivo.</div>' +
@@ -418,8 +418,7 @@ a_cuenta: function() {
     return '<div class="item" style="cursor:default"><div class="grow">' + p[1] + '</div><div class="switch ' + (S.prefs[p[0]] ? 'on' : '') + '" onclick="S.prefs[\'' + p[0] + '\']=!S.prefs[\'' + p[0] + '\'];save();render()"></div></div>';
   }).join('') + '</div>' +
   '<div class="section-t">Pago</div><div class="card" style="padding:4px 14px">' +
-  '<div class="item" onclick="toast(\'Gestión de tarjetas: próxima iteración\')"><span style="font-size:20px">💳</span><div class="grow">Visa ···· 4523 <span class="muted">vence 09/28</span></div><span class="muted">›</span></div>' +
-  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">➕</span><div class="grow">Agregar tarjeta</div><span class="muted">›</span></div></div>' +
+  '<div class="item" onclick="go(\'a_tarjetas\')"><span style="font-size:20px">💳</span><div class="grow">Medios de pago</div><span class="muted">›</span></div></div>' +
   '<div class="section-t">Otros</div><div class="card" style="padding:4px 14px">' +
   '<div class="item" onclick="go(\'ayuda\')"><span style="font-size:20px">❓</span><div class="grow">Centro de ayuda</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'changelog\')"><span style="font-size:20px">🧪</span><div class="grow">Acerca de este prototipo</div><span class="muted">›</span></div>' +
@@ -517,7 +516,7 @@ b_nego: function() {
   '<div class="bubble me">Sí, hay que cambiar el riel y ajustar la puerta. Con materiales te lo dejo en $' + ((S.postMonto || 28000).toLocaleString('es-CL')) + '.<div class="btime">10:32 ✓✓</div></div>' +
   '<div class="bubble them">Ya, de acuerdo 👍<div class="btime">10:35</div></div>' +
   '<div class="card" style="background:#E8EDF5;text-align:center;font-size:13.5px">¿Llegaron a acuerdo? Formaliza el monto para que Camila lo confirme.</div>' +
-  '<button class="btn primary" onclick="go(\'b_precio\')"><span style="color:var(--gold)">$</span> Establecer precio</button>' +
+  '<button class="btn primary" onclick="S.precioDig=\'\';save();go(\'b_precio\')"><span style="color:var(--gold)">$</span> Establecer precio</button>' +
   '</div>' + tabsB('b_chats') + '</div>';
 },
 
@@ -633,7 +632,7 @@ b_perfil: function() {
   '<button class="btn gold" onclick="go(\'b_billetera\')">Ver billetera y movimientos</button>' +
   '<div class="section-t">Mi cuenta</div><div class="card" style="padding:4px 14px">' +
   '<div class="item" onclick="go(\'b_reg3\')"><span style="font-size:20px">🧰</span><div class="grow">Mis oficios y radio de trabajo</div><span class="muted">›</span></div>' +
-  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🖼</span><div class="grow">Galería de trabajos</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'b_galeria\')"><span style="font-size:20px">🖼</span><div class="grow">Galería de trabajos</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'b_reputacion\')"><span style="font-size:20px">⭐</span><div class="grow">Reputación y sanciones</div><span class="chip bad" style="font-size:10px">1</span><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'b_notifs\')"><span style="font-size:20px">🔔</span><div class="grow">Notificaciones</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'rol\')"><span style="font-size:20px">🚪</span><div class="grow" style="color:var(--red)">Cambiar de modo / salir</div></div></div>' +
@@ -727,6 +726,44 @@ a_servicio_det: function() {
   '</div>' + tabsA('a_servicios') + '</div>';
 },
 
+a_tarjetas: function() {
+  S.cards = S.cards || [{ brand: 'Visa', last: '4523', exp: '09/28', main: true }];
+  S.addingCard = S.addingCard || false;
+  return '<div class="screen">' + header('Medios de pago', null, 'a_cuenta') +
+  '<div class="content">' +
+  S.cards.map(function(c, i){
+    return '<div class="card row" style="' + (c.main ? 'border-color:var(--navy)' : '') + '"><span style="font-size:20px">💳</span>' +
+    '<div class="grow"><b>' + c.brand + ' ···· ' + c.last + '</b><div class="muted">vence ' + c.exp + (c.main ? ' · principal' : '') + '</div></div>' +
+    (c.main ? '<span class="chip info">Principal</span>' : '<span class="chip warn" style="cursor:pointer" onclick="S.cards.forEach(function(x){x.main=false});S.cards[' + i + '].main=true;save();render()">Usar</span>') +
+    (S.cards.length > 1 ? '<span style="color:var(--red);cursor:pointer;font-size:18px;margin-left:6px" onclick="S.cards.splice(' + i + ',1);S.cards[0].main=true;save();render()">✕</span>' : '') + '</div>';
+  }).join('') +
+  (S.addingCard
+    ? '<div class="card"><b style="display:block;margin-bottom:10px">Nueva tarjeta</b>' +
+      '<div style="display:flex;flex-direction:column;gap:10px">' +
+      '<input id="nc_num" inputmode="numeric" placeholder="Número de tarjeta (usa 4111 1111 1111 1111)">' +
+      '<div class="grid2"><input id="nc_exp" placeholder="MM/AA"><input inputmode="numeric" placeholder="CVV"></div>' +
+      '<button class="btn primary" onclick="addCard()">Guardar tarjeta</button>' +
+      '<button class="btn ghost" onclick="S.addingCard=false;save();render()">Cancelar</button></div></div>'
+    : '<button class="btn ghost" onclick="S.addingCard=true;save();render()">➕ Agregar tarjeta</button>') +
+  '<div class="card" style="background:#E8EDF5;font-size:13.5px">Tus datos de tarjeta se procesan por una pasarela certificada. PROFESSION nunca los almacena. <b>(Prototipo: no ingreses tarjetas reales.)</b></div>' +
+  '</div>' + tabsA('a_cuenta') + '</div>';
+},
+
+b_galeria: function() {
+  S.gal = S.gal === undefined ? 4 : S.gal;
+  return '<div class="screen">' + header('Galería de trabajos', S.gal + ' fotos', 'b_perfil') +
+  '<div class="content">' +
+  '<div class="card" style="background:#E8EDF5;font-size:13.5px">Las fotos de trabajos terminados son tu mejor carta de presentación: los perfiles con galería reciben más contactos.</div>' +
+  '<div class="grid2">' +
+  Array.apply(null, Array(S.gal)).map(function(_, i){
+    return '<div style="height:100px;border-radius:12px;background:repeating-linear-gradient(45deg,#e8ebf0,#e8ebf0 8px,#f4f6f9 8px,#f4f6f9 16px);border:1px solid var(--line);position:relative;display:flex;align-items:center;justify-content:center" class="muted">trabajo ' + (i + 1) +
+    '<span style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.45);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer" onclick="S.gal--;save();render()">✕</span></div>';
+  }).join('') +
+  '<div style="height:100px;border-radius:12px;border:2px dashed var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);font-weight:700" onclick="S.gal++;save();render();toast(\'Foto agregada (mock)\')">＋<span style="font-size:12px">Agregar foto</span></div>' +
+  '</div>' +
+  '</div>' + tabsB('b_perfil') + '</div>';
+},
+
 ayuda: function() {
   S.faqOpen = S.faqOpen === undefined ? -1 : S.faqOpen;
   var faqs = [
@@ -751,7 +788,12 @@ ayuda: function() {
 changelog: function() {
   return '<div class="screen">' + header('PROFESSION v2', 'Prototipo en desarrollo continuo', 'rol') +
   '<div class="content">' +
-  '<div class="card gold"><b>Iteración 5 — Agenda, búsqueda y edición de perfil</b><div class="muted" style="margin-top:6px">' +
+  '<div class="card gold"><b>Iteración 6 — QA transversal y gestión</b><div class="muted" style="margin-top:6px">' +
+  '• Medios de pago: listar, agregar (con detección de marca), cambiar principal y eliminar tarjetas<br>' +
+  '• Galería de trabajos del profesional: agregar y quitar fotos<br>' +
+  '• Teclado de precio parte limpio en cada negociación<br>' +
+  '• Eliminados los últimos avisos de "próxima iteración" del flujo principal</div></div>' +
+  '<div class="card"><b>Iteración 5 — Agenda, búsqueda y edición de perfil</b><div class="muted" style="margin-top:6px">' +
   '• "Programar servicio" desde el perfil del maestro: calendario + horarios (con ocupados) → crea la solicitud y abre el chat<br>' +
   '• Búsqueda de oficios en vivo en el home con estado vacío útil<br>' +
   '• Agenda del profesional interactiva por día, con estado vacío y bloqueo de horarios<br>' +
@@ -815,6 +857,16 @@ function rutLive(v) {
   var ok = rutOk(v);
   document.getElementById('rutmsg').innerHTML = v ? (ok ? '<span class="chip ok">✓ RUT válido</span>' : '<span class="chip bad">RUT incompleto o inválido</span>') : '';
   document.getElementById('rutbtn').disabled = !ok;
+}
+function addCard() {
+  var num = ((document.getElementById('nc_num') || {}).value || '').replace(/\s/g, '');
+  var exp = (document.getElementById('nc_exp') || {}).value || '12/29';
+  if (num.length < 13) { toast('Número de tarjeta incompleto'); return; }
+  var brand = num[0] === '4' ? 'Visa' : num[0] === '5' ? 'Mastercard' : 'Tarjeta';
+  S.cards.push({ brand: brand, last: num.slice(-4), exp: exp, main: false });
+  S.addingCard = false; save();
+  toast('Tarjeta agregada ✓');
+  render();
 }
 function agConfirm() {
   var dias = ['Lu 10','Ma 11','Mi 12','Ju 13','Vi 14','Sá 15'];
