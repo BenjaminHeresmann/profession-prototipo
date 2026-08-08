@@ -72,7 +72,7 @@ label{font-size:13px;font-weight:700;margin-bottom:5px;display:block}
 </head>
 <body>
 <div id="app"></div>
-<div class="badge-v" onclick="go('changelog')">v2 · iter 3</div>
+<div class="badge-v" onclick="go('changelog')">v2 · iter 4</div>
 <script>
 /* ============ PROFESSION v2 — SPA propia, extensible ============ */
 /* Estado global persistente */
@@ -362,7 +362,7 @@ a_servicios: function() {
   return '<div class="screen">' + header('Mis servicios', null, null) +
   '<div class="content">' + mine.join('') +
   MY_SERVICES.map(function(s){
-    return '<div class="card" onclick="toast(\'Detalle del servicio: próxima iteración\')" style="cursor:pointer">' +
+    return '<div class="card" onclick="go(\'a_servicio_det\',' + s.id + ')" style="cursor:pointer">' +
     '<div class="row"><div class="grow"><b>' + s.t + '</b><div class="muted">' + s.pro + ' · ' + s.fecha + '</div></div>' +
     '<span class="chip ' + s.tipo + '">' + s.estado + '</span></div>' +
     '<div class="divider" style="margin:10px 0"></div>' +
@@ -420,7 +420,7 @@ a_cuenta: function() {
   '<div class="item" onclick="toast(\'Gestión de tarjetas: próxima iteración\')"><span style="font-size:20px">💳</span><div class="grow">Visa ···· 4523 <span class="muted">vence 09/28</span></div><span class="muted">›</span></div>' +
   '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">➕</span><div class="grow">Agregar tarjeta</div><span class="muted">›</span></div></div>' +
   '<div class="section-t">Otros</div><div class="card" style="padding:4px 14px">' +
-  '<div class="item" onclick="toast(\'Centro de ayuda: próxima iteración\')"><span style="font-size:20px">❓</span><div class="grow">Centro de ayuda</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'ayuda\')"><span style="font-size:20px">❓</span><div class="grow">Centro de ayuda</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'changelog\')"><span style="font-size:20px">🧪</span><div class="grow">Acerca de este prototipo</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'rol\')"><span style="font-size:20px">🚪</span><div class="grow" style="color:var(--red)">Cambiar de modo / salir</div></div></div>' +
   '</div>' + tabsA('a_cuenta') + '</div>';
@@ -627,15 +627,101 @@ b_perfil: function() {
   '<div class="section-t">Mi cuenta</div><div class="card" style="padding:4px 14px">' +
   '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🧰</span><div class="grow">Mis oficios y radio de trabajo</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">🖼</span><div class="grow">Galería de trabajos</div><span class="muted">›</span></div>' +
-  '<div class="item" onclick="toast(\'Próxima iteración\')"><span style="font-size:20px">⭐</span><div class="grow">Reputación y sanciones</div><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'b_reputacion\')"><span style="font-size:20px">⭐</span><div class="grow">Reputación y sanciones</div><span class="chip bad" style="font-size:10px">1</span><span class="muted">›</span></div>' +
+  '<div class="item" onclick="go(\'b_notifs\')"><span style="font-size:20px">🔔</span><div class="grow">Notificaciones</div><span class="muted">›</span></div>' +
   '<div class="item" onclick="go(\'rol\')"><span style="font-size:20px">🚪</span><div class="grow" style="color:var(--red)">Cambiar de modo / salir</div></div></div>' +
   '</div>' + tabsB('b_perfil') + '</div>';
+},
+
+b_reputacion: function() {
+  var dist = [[5, 86], [4, 18], [3, 5], [2, 2], [1, 1]];
+  var max = 86;
+  return '<div class="screen">' + header('Mi reputación', '★ 4,9 · 112 opiniones', 'b_perfil') +
+  '<div class="content">' +
+  '<div class="card"><div class="row" style="gap:14px"><div style="text-align:center"><b style="font-size:34px">4,9</b><div class="stars">★★★★★</div><div class="muted" style="font-size:11px">112 opiniones</div></div>' +
+  '<div class="grow">' + dist.map(function(d){
+    return '<div class="row" style="gap:6px;margin:3px 0"><span class="muted" style="width:10px;font-size:12px">' + d[0] + '</span><div class="grow" style="height:7px;border-radius:99px;background:var(--line)"><div style="width:' + Math.round(d[1] / max * 100) + '%;height:100%;border-radius:99px;background:var(--gold)"></div></div><span class="muted" style="font-size:11px;width:22px">' + d[1] + '</span></div>';
+  }).join('') + '</div></div></div>' +
+  '<div class="card" style="border-left:4px solid var(--red);background:var(--red-l)">' +
+  '<div class="row"><b style="color:var(--red)" class="grow">⚠ Sanción activa · inasistencia</b><span class="chip bad">1 de 3</span></div>' +
+  '<div style="font-size:14px;margin:6px 0">No llegaste al trabajo #4102 del 28/07 sin avisar con anticipación.</div>' +
+  '<div style="font-size:13px;background:#fff;border-radius:10px;padding:10px">' +
+  '<div class="row" style="gap:8px"><span class="chip bad">1</span><span class="grow">1ª inasistencia: amonestación + bloqueo 48 hrs</span><b style="font-size:11px;color:var(--red)">ACTUAL</b></div>' +
+  '<div class="row" style="gap:8px;opacity:.65;margin-top:6px"><span class="chip warn">2</span><span class="grow">2ª: suspensión de 15 a 30 días</span></div>' +
+  '<div class="row" style="gap:8px;opacity:.65;margin-top:6px"><span class="chip warn">3</span><span class="grow">3ª: eliminación definitiva de la cuenta</span></div></div>' +
+  '<div class="row" style="margin-top:8px"><span class="muted grow" style="font-size:13px">Bloqueo hasta: 30/07, 14:00</span><b style="font-size:13px;text-decoration:underline;cursor:pointer" onclick="toast(\'Apelación: revisada por soporte en 24 hrs\')">Ver detalle y apelar</b></div></div>' +
+  '<div class="section-t">Últimas opiniones</div>' +
+  '<div class="card"><div class="stars">★★★★★</div><div style="font-size:14px;margin:4px 0">"Impecable, puntual y muy ordenado. Volvería a contratarlo."</div><div class="muted">Marcela V. · Mueble a medida · 04/08/26</div></div>' +
+  '<div class="card"><div class="stars">★★★★☆</div><div style="font-size:14px;margin:4px 0">"Buen trabajo, llegó con algo de atraso pero avisó."</div><div class="muted">Jorge P. · Puerta de cocina · 30/03/26</div></div>' +
+  '<div class="card" style="background:#E8EDF5;font-size:13.5px">Tu rating define tu posición en las búsquedas. Responde rápido y cumple tus horarios para mejorar.</div>' +
+  '</div>' + tabsB('b_perfil') + '</div>';
+},
+
+b_notifs: function() {
+  var items = [
+    ['var(--navy)', 'Trabajo nuevo cerca de ti', 'Carpintería a 0,8 km · "Reparar puerta de closet" · Ref: $30.000', 'Hace 5 min'],
+    ['var(--navy)', 'Mensaje de Camila R.', '"Perfecto, te espero a las 15:00 👍"', 'Hace 22 min'],
+    ['var(--green)', 'Pago liberado', 'Marcela V. aprobó el trabajo. +$105.600 disponibles en tu billetera.', 'Ayer, 18:40'],
+    ['var(--red)', 'Sanción aplicada', 'Inasistencia al trabajo #4102: amonestación 1 de 3 y bloqueo de 48 hrs. Puedes apelar.', '28/07, 14:02'],
+    ['var(--green)', 'Precio confirmado', 'Camila confirmó tu propuesta. Contrato cerrado.', 'Hoy, 10:41']
+  ];
+  return '<div class="screen">' + header('Notificaciones', null, 'b_panel') +
+  '<div class="content">' +
+  items.map(function(n){
+    return '<div class="card" style="border-left:4px solid ' + n[0] + '"><b>' + n[1] + '</b><div style="font-size:14px;margin:3px 0">' + n[2] + '</div><div class="muted">' + n[3] + '</div></div>';
+  }).join('') +
+  '</div>' + tabsB('b_panel') + '</div>';
+},
+
+a_servicio_det: function() {
+  var s = MY_SERVICES.filter(function(x){ return x.id === S.param; })[0] || MY_SERVICES[1];
+  var fin = s.estado === 'Finalizado';
+  return '<div class="screen">' + header(s.t, s.pro + ' · #' + s.id, 'a_servicios') +
+  '<div class="content">' +
+  '<div class="card"><div class="row"><span class="muted grow">Estado</span><span class="chip ' + s.tipo + '">' + s.estado + '</span></div>' +
+  '<div class="divider" style="margin:8px 0"></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow">Fecha</span><b>' + s.fecha + '</b></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow">Profesional</span><b>' + s.pro + ' ✔</b></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow">Dirección</span><b>Av. Irarrázaval 3421</b></div>' +
+  '<div class="divider" style="margin:8px 0"></div>' +
+  '<div class="row"><b class="grow">Precio acordado</b><span class="money" style="font-size:18px">' + fmt(s.monto) + '</span></div></div>' +
+  (fin ? '<div class="card" style="background:var(--green-l);border-color:var(--green)"><b>✓ Pago liberado al profesional.</b><div class="muted" style="margin-top:4px">Calificaste este servicio con ★★★★★.</div></div>' +
+  '<button class="btn primary" onclick="go(\'a_publicar\')">Volver a contratar</button>' +
+  '<button class="btn ghost" onclick="toast(\'Boleta enviada a tu correo (mock)\')">Descargar boleta</button>'
+  : '<button class="btn primary" onclick="go(\'a_activo\')">Ver servicio en curso</button>') +
+  '</div>' + tabsA('a_servicios') + '</div>';
+},
+
+ayuda: function() {
+  S.faqOpen = S.faqOpen === undefined ? -1 : S.faqOpen;
+  var faqs = [
+    ['¿Puedo pagar en efectivo?', 'No. El único medio de pago es tarjeta dentro de la app. Esto protege a ambas partes: tu pago queda retenido hasta que apruebes el trabajo, y el profesional tiene garantía de cobro.'],
+    ['¿Qué pasa si el maestro me cobra más al llegar?', 'El precio confirmado es un contrato cerrado y no puede cambiar. Si te piden un monto distinto, recházalo y repórtalo — el profesional arriesga sanciones. Trabajo extra se acuerda como una nueva solicitud.'],
+    ['¿Cuándo se le paga al profesional?', 'Cuando marcas "Finalizado con éxito". Si algo salió mal, abre una disputa: el pago queda retenido mientras la revisamos (máx. 48 hrs hábiles).'],
+    ['¿Cómo sé que el profesional es confiable?', 'Todos pasan verificación de identidad con biometría y certificado de antecedentes al día. Además ves su reputación real: notas, opiniones y % de puntualidad.'],
+    ['Soy profesional, ¿cuánto cobra PROFESSION?', 'La comisión se muestra siempre antes de aceptar un trabajo y se descuenta solo cuando el pago se libera. Sin cobros ocultos ni mensualidades.']
+  ];
+  return '<div class="screen">' + header('Centro de ayuda', null, 'a_cuenta') +
+  '<div class="content">' +
+  '<div class="card" style="padding:4px 14px">' + faqs.map(function(f, i){
+    var open = S.faqOpen === i;
+    return '<div class="item" style="flex-direction:column;align-items:stretch" onclick="S.faqOpen=' + (open ? -1 : i) + ';save();render()">' +
+    '<div class="row"><b class="grow" style="font-size:14.5px">' + f[0] + '</b><span class="muted">' + (open ? '▴' : '▾') + '</span></div>' +
+    (open ? '<div class="muted" style="margin-top:8px;font-size:14px">' + f[1] + '</div>' : '') + '</div>';
+  }).join('') + '</div>' +
+  '<div class="card" style="text-align:center"><b>¿No encontraste tu respuesta?</b><div class="muted" style="margin:6px 0 12px">Nuestro equipo responde en menos de 24 hrs.</div><button class="btn primary" onclick="toast(\'Mensaje enviado a soporte (mock)\')">Contactar soporte</button></div>' +
+  '</div>' + tabsA('a_cuenta') + '</div>';
 },
 
 changelog: function() {
   return '<div class="screen">' + header('PROFESSION v2', 'Prototipo en desarrollo continuo', 'rol') +
   '<div class="content">' +
-  '<div class="card gold"><b>Iteración 3 — Flujo profesional completo</b><div class="muted" style="margin-top:6px">' +
+  '<div class="card gold"><b>Iteración 4 — Reputación, notificaciones y ayuda</b><div class="muted" style="margin-top:6px">' +
+  '• Reputación del profesional: distribución de notas + sanción activa con la matriz real (48 hrs → 15-30 días → eliminación) y apelación<br>' +
+  '• Notificaciones del profesional por tipo (trabajo, mensaje, pago, sanción)<br>' +
+  '• Detalle de servicios históricos con boleta y "volver a contratar"<br>' +
+  '• Centro de ayuda con FAQ de las reglas del marketplace</div></div>' +
+  '<div class="card"><b>Iteración 3 — Flujo profesional completo</b><div class="muted" style="margin-top:6px">' +
   '• Registro: RUT con validación real (módulo 11), verificación por pasos, oficios con sub-especialidades y radio de trabajo<br>' +
   '• Postulación con monto desde el panel → chat → "Establecer precio" con teclado numérico real<br>' +
   '• El precio digitado viaja a detalle del servicio y billetera (comisión 12% calculada)<br>' +
