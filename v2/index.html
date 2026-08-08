@@ -72,7 +72,7 @@ label{font-size:13px;font-weight:700;margin-bottom:5px;display:block}
 </head>
 <body>
 <div id="app"></div>
-<div class="badge-v" onclick="go('changelog')">v2 · iter 1</div>
+<div class="badge-v" onclick="go('changelog')">v2 · iter 2</div>
 <script>
 /* ============ PROFESSION v2 — SPA propia, extensible ============ */
 /* Estado global persistente */
@@ -210,26 +210,157 @@ a_pro: function() {
   '<div class="section-t">Opiniones</div>' +
   '<div class="card"><div class="stars">★★★★★</div><div style="font-size:14px;margin:4px 0">"Impecable, puntual y muy ordenado. Volvería a contratarlo."</div><div class="muted">Marcela V. · Providencia · 04/08/26</div></div>' +
   '<div class="card"><div class="stars">★★★★☆</div><div style="font-size:14px;margin:4px 0">"Buen trabajo, llegó con algo de atraso pero avisó."</div><div class="muted">Jorge P. · Macul · 30/03/26</div></div>' +
-  '<button class="btn primary" onclick="toast(\'Chat de contratación: próxima iteración\')">Contactar y pedir precio</button>' +
+  '<button class="btn primary" onclick="if(!S.sol){S.sol={t:\'Puerta de closet\',oficio:\'Carpintería\',estado:\'Negociando\'};save()}go(\'a_nego\',1)">Contactar y pedir precio</button>' +
   '<button class="btn ghost" onclick="toast(\'Agenda: próxima iteración\')">Programar servicio</button>' +
   '</div>' + tabsA('a_home') + '</div>';
 },
 
 a_publicar: function() {
+  var pre = S.param && typeof S.param === 'string' ? S.param : 'Carpintería';
+  S.urgSel = S.urgSel === undefined ? 0 : S.urgSel;
+  var urgs = [['bad','Urgente, hoy'],['warn','Esta semana'],['info','Flexible']];
   return '<div class="screen">' + header('Publicar solicitud', null, 'a_home') +
   '<div class="content">' +
-  '<div><label>Oficio</label><select>' + CATS.map(function(c){ return '<option>' + c.n + '</option>'; }).join('') + '</select></div>' +
-  '<div><label>¿Qué necesitas?</label><textarea rows="3" placeholder="Describe el problema con detalle..."></textarea></div>' +
-  '<div><label>Ubicación</label><input value="Av. Irarrázaval 3421, Ñuñoa"></div>' +
-  '<div><label>¿Para cuándo?</label><div class="row" style="gap:8px"><span class="chip bad">Urgente, hoy</span><span class="chip warn">Esta semana</span><span class="chip info">Flexible</span></div></div>' +
-  '<div><label>Presupuesto referencial (opcional)</label><input inputmode="numeric" placeholder="$ 30.000"></div>' +
-  '<button class="btn primary" onclick="toast(\'Flujo completo de solicitud: próxima iteración\');go(\'a_servicios\')">Publicar solicitud</button>' +
+  '<div><label>Oficio</label><select id="f_oficio">' + CATS.map(function(c){ return '<option' + (c.n === pre ? ' selected' : '') + '>' + c.n + '</option>'; }).join('') + '</select></div>' +
+  '<div><label>¿Qué necesitas?</label><textarea id="f_desc" rows="3" placeholder="Describe el problema con detalle...">' + (S.fDesc || 'Reparar puerta de closet descolgada, es de riel. Dormitorio principal.') + '</textarea></div>' +
+  '<div><label>Ubicación</label><input id="f_ubi" value="Av. Irarrázaval 3421, Ñuñoa"></div>' +
+  '<div><label>¿Para cuándo?</label><div class="row" style="gap:8px">' +
+  urgs.map(function(u, i){ return '<span class="chip ' + (S.urgSel === i ? u[0] : 'info') + '" style="cursor:pointer;' + (S.urgSel === i ? 'outline:2px solid var(--navy)' : 'opacity:.6') + '" onclick="S.urgSel=' + i + ';save();render()">' + u[1] + '</span>'; }).join('') + '</div></div>' +
+  '<div><label>Presupuesto referencial (opcional)</label><input id="f_ref" inputmode="numeric" value="30.000" onfocus="this.select()"></div>' +
+  '<button class="btn primary" onclick="pubSol()">Publicar solicitud</button>' +
   '</div>' + tabsA('a_home') + '</div>';
 },
 
-a_servicios: function() {
-  return '<div class="screen">' + header('Mis servicios', null, null) +
+a_propuestas: function() {
+  var sol = S.sol || {};
+  var props = [
+    { id: 1, n: 'Roberto Díaz', r: 4.9, op: 112, km: 1.2, cuando: 'puede hoy', monto: 37500, msg: '"Puedo ir hoy en la tarde. El riel probablemente hay que cambiarlo, lo confirmo al verlo."' },
+    { id: 2, n: 'Luis Contreras', r: 4.7, op: 61, km: 2.8, cuando: 'mañana', monto: 25000, msg: null },
+    { id: 3, n: 'Patricia Muñoz', r: 4.8, op: 87, km: 3.5, cuando: 'esta semana', monto: 32000, msg: null }
+  ];
+  return '<div class="screen">' + header('Propuestas', (sol.t || 'Solicitud') + ' · #4219', 'a_servicios') +
   '<div class="content">' +
+  '<div class="muted">3 maestros postularon' + (sol.ref ? ' · tu ref: ' + fmt(sol.ref) : '') + '</div>' +
+  props.map(function(p, i){
+    return '<div class="card' + (i === 0 ? ' gold' : '') + '">' +
+    '<div class="row"><div class="avatar">' + p.n.split(' ').map(function(w){return w[0];}).join('') + '</div>' +
+    '<div class="grow"><b>' + p.n + ' <span style="color:var(--gold)">✔</span></b>' +
+    '<div class="muted"><span class="stars">★</span> ' + p.r + ' (' + p.op + ') · a ' + p.km + ' km · ' + p.cuando + '</div></div>' +
+    '<div style="text-align:right"><span class="money" style="font-size:17px">' + fmt(p.monto) + '</span><div class="muted" style="font-size:11px">monto inicial</div></div></div>' +
+    (p.msg ? '<div style="font-size:14px;margin:8px 0 2px;font-style:italic">' + p.msg + '</div>' : '') +
+    '<div class="row" style="margin-top:10px;gap:8px"><button class="btn primary" style="padding:11px" onclick="go(\'a_nego\',' + p.id + ')">Abrir chat</button><button class="btn ghost" style="padding:11px" onclick="go(\'a_pro\',' + p.id + ')">Ver perfil</button></div></div>';
+  }).join('') +
+  '<div class="card" style="background:#E8EDF5"><span style="font-size:14px">El monto inicial es referencial: el precio final se acuerda por chat y se confirma antes de pagar.</span></div>' +
+  '</div>' + tabsA('a_servicios') + '</div>';
+},
+
+a_nego: function() {
+  var sol = S.sol || {};
+  return '<div class="screen">' + header('Roberto Díaz ✔', 'En línea', 'a_propuestas') +
+  '<div class="content grow" style="display:flex;flex-direction:column;gap:10px">' +
+  '<div class="card" style="background:var(--gold-l);border-color:var(--gold);padding:10px"><span style="font-size:13px"><b>⚠</b> Todo pago se hace por la app. Acordar pagos en efectivo está prohibido.</span></div>' +
+  '<div class="bubble me">Hola Roberto, ¿viste las fotos? ¿Cuánto saldría?<div class="btime">10:28 ✓✓</div></div>' +
+  '<div class="bubble them">Hola Camila. Hay que cambiar el riel y ajustar la puerta. Con materiales incluidos te lo dejo en $37.500.<div class="btime">10:32</div></div>' +
+  '<div class="bubble me">Perfecto, de acuerdo 👍<div class="btime">10:35 ✓✓</div></div>' +
+  '<div class="card gold" style="text-align:center"><div class="muted" style="letter-spacing:1px;font-size:11px">PROPUESTA FORMAL DE PRECIO</div>' +
+  '<div class="money" style="font-size:30px;margin:6px 0">$37.500</div>' +
+  '<div style="font-size:14px;margin-bottom:10px">Cambio de riel y ajuste de puerta de closet, materiales incluidos.</div>' +
+  '<button class="btn green" onclick="go(\'a_confirmar\')">Revisar y confirmar</button></div>' +
+  '</div>' +
+  '<div style="padding:12px 16px 88px"><div class="row"><input placeholder="Escribe un mensaje…" id="msgin2"><button class="btn primary" style="width:auto;padding:12px 16px" onclick="var i=document.getElementById(\'msgin2\');if(i.value){toast(\'Enviado (mock)\');i.value=\'\'}">➤</button></div></div>' +
+  tabsA('a_servicios') + '</div>';
+},
+
+a_confirmar: function() {
+  return '<div class="screen" style="background:rgba(22,41,74,.97);justify-content:flex-end">' +
+  '<div class="muted" style="color:#fff;text-align:center;padding:20px">Chat con Roberto Díaz — al fondo</div>' +
+  '<div style="background:#fff;border-radius:22px 22px 0 0;padding:22px 18px 90px;display:flex;flex-direction:column;gap:12px">' +
+  '<h2 style="text-align:center">Confirma el precio acordado</h2>' +
+  '<div class="muted" style="text-align:center">Revisa que sea el mismo valor que acordaste con Roberto en el chat.</div>' +
+  '<div class="card" style="background:var(--green-l);border-color:var(--green);text-align:center">' +
+  '<div style="width:46px;height:46px;border-radius:50%;background:var(--green);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">$</div>' +
+  '<div class="muted">Precio acordado</div><div class="money" style="font-size:38px">$37.500</div>' +
+  '<div class="muted" style="margin-top:2px">Incluye cargo de servicio <span class="chip info" style="font-size:10px">por definir</span></div>' +
+  '<div class="chip ok" style="margin-top:8px">Puerta de closet · Ñuñoa</div>' +
+  '<div class="divider" style="margin:12px 0"></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow" style="text-align:left">Profesional</span><b>Roberto Díaz ✔</b></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow" style="text-align:left">Fecha</span><b>Hoy, 15:00 hrs</b></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow" style="text-align:left">Dirección</span><b>Av. Irarrázaval 3421</b></div></div>' +
+  '<div class="card" style="background:var(--gold-l);border-color:var(--gold);font-size:14px"><b>!</b> Al confirmar se cierra el contrato: <b>el precio no puede cambiar</b> y tu pago quedará protegido hasta que apruebes el trabajo.</div>' +
+  '<button class="btn green" onclick="S.sol=S.sol||{};S.sol.estado=\'Confirmado\';S.sol.monto=37500;save();go(\'a_pago\')">Confirmar $37.500</button>' +
+  '<button class="btn ghost" onclick="go(\'a_nego\',1)">Este no es el precio — cancelar</button>' +
+  '<div class="muted" style="text-align:center;font-size:12px">Al cancelar vuelves al chat, sin consecuencias.</div>' +
+  '</div></div>';
+},
+
+a_pago: function() {
+  return '<div class="screen">' + header('Pagar servicio', null, 'a_confirmar') +
+  '<div class="content">' +
+  '<div class="card"><div class="muted" style="letter-spacing:1px;font-size:11px">RESUMEN</div>' +
+  '<b style="display:block;margin:6px 0">Puerta de closet · Roberto Díaz ✔</b>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow">Servicio</span><span>' + fmt(37500) + '</span></div>' +
+  '<div class="row" style="font-size:14px"><span class="muted grow">Cargo de servicio <span class="chip info" style="font-size:10px">por definir</span></span><span>$0</span></div>' +
+  '<div class="divider" style="margin:8px 0"></div>' +
+  '<div class="row"><b class="grow">Total a pagar</b><span class="money" style="font-size:18px">' + fmt(37500) + '</span></div></div>' +
+  '<div class="section-t">Medio de pago</div>' +
+  '<div class="card row" style="border-color:var(--navy)"><span style="font-size:20px">💳</span><div class="grow"><b>Visa ···· 4523</b><div class="muted">vence 09/28</div></div><span style="color:var(--navy)">●</span></div>' +
+  '<div class="card row" style="cursor:pointer" onclick="toast(\'Gestión de tarjetas: próxima iteración\')"><span style="font-size:20px">➕</span><div class="grow">Agregar otra tarjeta</div></div>' +
+  '<div class="card" style="background:var(--green-l);border-color:var(--green)"><div class="row"><span style="font-size:20px">🛡</span><div class="grow" style="font-size:14px"><b>Tu pago queda protegido.</b> No se lo entregamos a Roberto hasta que apruebes el trabajo.</div></div></div>' +
+  '<button class="btn green" onclick="S.sol=S.sol||{};S.sol.estado=\'En curso\';save();toast(\'Pago retenido con éxito\');go(\'a_activo\')">Pagar ' + fmt(37500) + ' protegido</button>' +
+  '<div class="muted" style="text-align:center;font-size:12px">Pago seguro. Nunca pagues en efectivo.</div>' +
+  '</div></div>';
+},
+
+a_activo: function() {
+  S.rating = S.rating || 0;
+  var steps = ['Confirmado','En camino','En ejecución','Por aprobar'];
+  var needComment = S.rating > 0 && S.rating < 4;
+  var comment = S.ratingComment || '';
+  var canFinish = S.rating > 0 && (!needComment || comment.length >= 10);
+  return '<div class="screen">' +
+  '<div class="header"><div class="hrow"><div class="back" onclick="go(\'a_servicios\')">‹</div><div class="grow"><h1 style="font-size:18px">Puerta de closet · #4219</h1></div><span class="chip warn">Por aprobar</span></div>' +
+  '<div class="row" style="margin-top:12px;gap:4px">' + steps.map(function(st, i){ return '<div class="grow" style="height:5px;border-radius:99px;background:' + (i < 4 ? 'var(--green)' : 'rgba(255,255,255,.25)') + '"></div>'; }).join('') + '</div>' +
+  '<div class="row" style="margin-top:4px">' + steps.map(function(st){ return '<div class="grow" style="font-size:9.5px;opacity:.8;text-align:center">' + st + '</div>'; }).join('') + '</div></div>' +
+  '<div class="content">' +
+  '<h2 style="text-align:center;margin-top:6px">Roberto marcó el trabajo como terminado</h2>' +
+  '<div class="muted" style="text-align:center">Revisa el resultado. Al aprobar, liberamos tu pago de <b class="money">$37.500</b>.</div>' +
+  '<div class="card" style="text-align:center"><b>¿Cómo estuvo el trabajo de Roberto?</b>' +
+  '<div style="font-size:34px;margin:8px 0;letter-spacing:6px">' + [1,2,3,4,5].map(function(n){ return '<span style="cursor:pointer;color:' + (n <= S.rating ? 'var(--gold)' : '#d8dde5') + '" onclick="S.rating=' + n + ';save();render()">★</span>'; }).join('') + '</div>' +
+  (needComment ? '<div class="chip warn" style="margin-bottom:8px">Con menos de 4 ★ el comentario es obligatorio</div><textarea rows="3" placeholder="Cuéntanos qué pasó… (mín. 10 caracteres)" oninput="S.ratingComment=this.value;save();document.getElementById(\'btnfin\').disabled=this.value.length<10">' + comment + '</textarea>' : '') + '</div>' +
+  '<button class="btn green" id="btnfin"' + (canFinish ? '' : ' disabled') + ' onclick="finishSol()">✓ Finalizado con éxito — liberar pago</button>' +
+  '<button class="btn danger-ghost" onclick="go(\'a_disputa\')">Tengo un problema — abrir disputa</button>' +
+  '<div class="muted" style="text-align:center;font-size:12px">Si abres una disputa, tu pago sigue retenido mientras la revisamos.</div>' +
+  '</div></div>';
+},
+
+a_disputa: function() {
+  return '<div class="screen">' + header('Disputa abierta', 'Puerta de closet · #4219', 'a_activo') +
+  '<div class="content">' +
+  '<div class="card" style="background:var(--gold-l);border-color:var(--gold)"><div class="row"><span style="font-size:20px">$</span><div class="grow" style="font-size:14px"><b>Tu pago de $37.500 sigue protegido.</b> No se libera al profesional mientras revisamos el caso.</div></div></div>' +
+  '<div class="card"><div class="muted" style="letter-spacing:1px;font-size:11px">ESTADO DE LA REVISIÓN</div>' +
+  '<div class="item" style="cursor:default"><span class="chip ok">✓</span><div class="grow"><b>Disputa recibida</b><div class="muted">Hoy, con 2 fotos adjuntas</div></div></div>' +
+  '<div class="item" style="cursor:default"><span class="chip info">2</span><div class="grow"><b>En revisión por PROFESSION</b><div class="muted">Respuesta en máximo 48 hrs hábiles</div></div></div>' +
+  '<div class="item" style="cursor:default"><span class="chip info" style="opacity:.5">3</span><div class="grow" style="opacity:.6"><b>Resolución</b><div class="muted">Reembolso total, parcial o liberación del pago</div></div></div></div>' +
+  '<div><label>Tu reporte</label><textarea rows="3" placeholder="Describe el problema y adjunta fotos..."></textarea></div>' +
+  '<button class="btn primary" onclick="toast(\'Reporte enviado (mock)\');go(\'a_servicios\')">Enviar reporte</button>' +
+  '<div class="muted" style="text-align:center;font-size:12px">El chat con Roberto queda en solo lectura durante la disputa.</div>' +
+  '</div></div>';
+},
+
+a_servicios: function() {
+  var mine = [];
+  if (S.sol) {
+    var est = S.sol.estado || 'Negociando';
+    var chip = est === 'Finalizado' ? 'info' : est === 'Negociando' ? 'warn' : 'ok';
+    var dest = est === 'Negociando' ? 'a_propuestas' : est === 'En curso' ? 'a_activo' : null;
+    mine.push('<div class="card gold"' + (dest ? ' onclick="go(\'' + dest + '\')" style="cursor:pointer"' : '') + '>' +
+      '<div class="row"><div class="grow"><b>' + S.sol.t + '</b><div class="muted">' + S.sol.oficio + ' · #4219</div></div>' +
+      '<span class="chip ' + chip + '">' + est + '</span></div>' +
+      (S.sol.monto ? '<div class="divider" style="margin:10px 0"></div><div class="row"><span class="muted grow">Precio acordado</span><span class="money">' + fmt(S.sol.monto) + '</span></div>' : '') +
+      (dest ? '<div class="muted" style="margin-top:6px;font-size:12px">Toca para continuar ›</div>' : '') + '</div>');
+  }
+  return '<div class="screen">' + header('Mis servicios', null, null) +
+  '<div class="content">' + mine.join('') +
   MY_SERVICES.map(function(s){
     return '<div class="card" onclick="toast(\'Detalle del servicio: próxima iteración\')" style="cursor:pointer">' +
     '<div class="row"><div class="grow"><b>' + s.t + '</b><div class="muted">' + s.pro + ' · ' + s.fecha + '</div></div>' +
@@ -357,7 +488,14 @@ b_perfil: function() {
 changelog: function() {
   return '<div class="screen">' + header('PROFESSION v2', 'Prototipo en desarrollo continuo', 'rol') +
   '<div class="content">' +
-  '<div class="card gold"><b>Iteración 1 — Fundación</b><div class="muted" style="margin-top:6px">' +
+  '<div class="card gold"><b>Iteración 2 — Flujo cliente completo</b><div class="muted" style="margin-top:6px">' +
+  '• Publicar solicitud con datos reales (oficio, urgencia seleccionable, presupuesto)<br>' +
+  '• Propuestas de maestros → chat de negociación → propuesta formal<br>' +
+  '• Confirmación ceremonial de precio + pago protegido (escrow)<br>' +
+  '• Servicio activo con tracker, calificación (comentario obligatorio &lt;4★) y liberación de pago<br>' +
+  '• Vista de disputa con pago retenido<br>' +
+  '• "Mis servicios" refleja el estado real de tu solicitud</div></div>' +
+  '<div class="card"><b>Iteración 1 — Fundación</b><div class="muted" style="margin-top:6px">' +
   '• App reconstruida con código propio extensible<br>' +
   '• Selección de rol + navegación completa por tabs<br>' +
   '• Cliente: home, lista por oficio, perfil del maestro, publicar, mis servicios, mensajes + chat, notificaciones, mi cuenta con preferencias<br>' +
@@ -368,6 +506,30 @@ changelog: function() {
   '</div></div>';
 }
 };
+
+/* ---- Acciones del flujo de solicitud ---- */
+function pubSol() {
+  var desc = (document.getElementById('f_desc') || {}).value || '';
+  var refRaw = ((document.getElementById('f_ref') || {}).value || '').replace(/[^0-9]/g, '');
+  S.fDesc = desc;
+  S.sol = {
+    t: desc.length > 3 ? (desc.split(',')[0].slice(0, 32)) : 'Nueva solicitud',
+    oficio: (document.getElementById('f_oficio') || {}).value || 'Carpintería',
+    desc: desc,
+    ref: refRaw ? parseInt(refRaw, 10) : null,
+    estado: 'Negociando'
+  };
+  save();
+  toast('Solicitud publicada — 3 maestros postularon');
+  go('a_propuestas');
+}
+function finishSol() {
+  if (S.sol) { S.sol.estado = 'Finalizado'; }
+  S.lastRating = S.rating; S.rating = 0; S.ratingComment = '';
+  save();
+  toast('Pago de $37.500 liberado a Roberto ✓');
+  go('a_servicios');
+}
 
 function render() {
   var fn = SCREENS[S.screen] || SCREENS.rol;
